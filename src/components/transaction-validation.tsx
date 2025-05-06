@@ -1,3 +1,4 @@
+
 "use client";
 
 import type { FC } from 'react';
@@ -7,7 +8,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CheckCircle, QrCode, Star, ThumbsDown, ThumbsUp } from 'lucide-react';
 
-import type { Donation } from '@/types/donation';
+import type { Donation } from '@/types/donation'; // Use updated Donation type
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -61,9 +62,9 @@ const BusinessValidationForm: FC<{ donation: Donation, onSubmit: (code: string) 
               <FormControl>
                 <Input placeholder="Código proporcionado por la organización" {...field} />
               </FormControl>
-              <FormDescription>
-                Confirma la entrega ingresando el código del receptor.
-              </FormDescription>
+               <FormDescription>
+                 Confirma la entrega ingresando el código del receptor.
+               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -156,7 +157,7 @@ const TransactionValidation: FC<TransactionValidationProps> = ({ donation, role,
       console.log(`Validando donación ${donation.id} con código: ${code}`);
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
-      const success = code === 'VALID123'; // Mock validation logic
+      const success = donation.validationCode && code.toUpperCase() === donation.validationCode.toUpperCase(); // Mock validation logic using actual code
 
       if (success) {
           setIsValidated(true);
@@ -208,16 +209,18 @@ const TransactionValidation: FC<TransactionValidationProps> = ({ donation, role,
                     <ThumbsUp className="h-5 w-5" />
                     <span>Entrega ya validada.</span>
                 </div>
-            ) : donation.status === 'claimed' ? (
+            ) : donation.status === 'claimed' ? ( // Only allow validation if claimed
               <BusinessValidationForm donation={donation} onSubmit={handleValidationSubmit} />
             ) : (
-                 <p className="text-sm text-muted-foreground italic">Esperando que la organización recoja la donación.</p>
+                 <p className="text-sm text-muted-foreground italic">
+                    {donation.status === 'available' ? 'Esperando que la donación sea reclamada.' : 'La donación no está en estado de ser validada.'}
+                 </p>
             )}
           </div>
         )}
 
          {/* Separator between sections if both might appear (though unlikely in same view) */}
-        {role === 'business' && <Separator />}
+        {role === 'business' && role === 'organization' && <Separator />}
 
         {/* Organization View: Rate Donation */}
         {role === 'organization' && (
@@ -230,8 +233,10 @@ const TransactionValidation: FC<TransactionValidationProps> = ({ donation, role,
                 </div>
             ) : isValidated || donation.status === 'delivered' ? ( // Only allow rating after delivery is confirmed/validated
                 <OrganizationRatingForm donation={donation} onSubmit={handleRatingSubmit} />
+             ) : donation.status === 'claimed' ? (
+                  <p className="text-sm text-muted-foreground italic">Por favor espera a que la entrega sea validada por la empresa antes de calificar.</p>
              ) : (
-                 <p className="text-sm text-muted-foreground italic">Por favor confirma la recogida o espera la validación de entrega antes de calificar.</p>
+                 <p className="text-sm text-muted-foreground italic">Esta donación no está lista para ser calificada.</p>
              )}
            </div>
         )}
@@ -242,14 +247,8 @@ const TransactionValidation: FC<TransactionValidationProps> = ({ donation, role,
          )}
 
       </CardContent>
-      {/* Optional Footer */}
-      {/* <CardFooter>
-        <p className="text-xs text-muted-foreground text-center w-full">ID de Transacción: {donation.id}</p>
-      </CardFooter> */}
     </Card>
   );
 };
 
 export default TransactionValidation;
-
-    

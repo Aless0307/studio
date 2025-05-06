@@ -7,20 +7,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building, HeartHandshake, ListChecks, MessageSquare, PackagePlus, History, LayoutGrid } from 'lucide-react'; // Import more icons
 import MockMessagesView from "@/components/mock-messages-view"; // Import the new messages component
 import MockPickupProcess from "@/components/mock-pickup-process"; // Import the pickup process component
+import type { Donation } from "@/types/donation"; // Import Donation type
 
 // Mock donation for validation/rating example (adjust as needed based on DonationList updates)
-const mockDonationForValidation = {
+const mockDonationForValidation: Donation = {
   id: `donation-val-1`,
   itemName: 'Sopa de Lentejas Enlatada',
   description: 'Sopa casera, lista para calentar.',
-  quantity: '24 latas (1 caja)',
+  quantity: 24, // Numeric quantity
+  unit: 'latas', // Unit
+  pricePerUnit: undefined, // Is free
   expirationDate: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(), // Expires in 3 days
   pickupLocation: 'Almacén Central FoodLink',
   pickupInstructions: 'Entrada por puerta lateral (indicada). Aparcamiento disponible. L-V 9am-5pm.',
-  photoUrl: `https://picsum.photos/seed/102/400/300`,
+  photoUrl: `https://picsum.photos/seed/lentil_soup_cans/400/300`, // Hint based image
   postedBy: `Empresa C`,
   status: 'claimed' as const,
-  claimedBy: `Tu Organización` ,
+  claimedBy: `Tu Organización`,
   postedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), // Posted 2 days ago
   claimedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // Claimed yesterday
   deliveredAt: undefined,
@@ -74,6 +77,7 @@ export default function Home() {
                    {/* Example Pickup Process Section */}
                    <div className="mt-8">
                         <h3 className="text-xl font-semibold mb-4">Proceso de Recogida (Ejemplo)</h3>
+                        {/* Ensure mockDonationForValidation has the required fields */}
                         <MockPickupProcess donation={mockDonationForValidation} role="organization" />
                    </div>
 

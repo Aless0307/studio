@@ -15,7 +15,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Inbox, MessageSquare, User, Building, CheckCircle } from 'lucide-react';
 import type { Donation, Message } from '@/types/donation'; // Import types
 
-// Mock Data Function (similar to DonationList but focuses on messages)
+// Mock Data Function (using updated Donation type)
 const fetchMockMessageThreads = (role: 'business' | 'organization'): Donation[] => {
   // Reuse donation generation logic but ensure some have messages
   const mockData = Array.from({ length: 5 }, (_, i) => {
@@ -42,18 +42,20 @@ const fetchMockMessageThreads = (role: 'business' | 'organization'): Donation[] 
      return {
        id: donationId,
        itemName: `Artículo de Prueba ${i + 1}`,
-       quantity: `${i + 1} unidad(es)`,
+       quantity: (i + 1) * 5, // Example numeric quantity
+       unit: i % 2 === 0 ? 'kg' : 'unidades', // Example unit
        postedBy: `Empresa ${String.fromCharCode(65 + i)}`,
        claimedBy: `Org ${i + 1}`,
        status: status,
        messages: messages,
-       // Add other required fields with mock values if necessary
        expirationDate: new Date(baseDate.getTime() + 86400000 * 5).toISOString(),
        pickupLocation: `Ubicación ${i+1}`,
-       isFree: true,
+       isFree: i % 3 !== 0, // Example price logic
+       pricePerUnit: i % 3 === 0 ? undefined : 0.5, // Example price
        postedAt: postedDate.toISOString(),
        claimedAt: claimedDate.toISOString(),
        deliveredAt: deliveredDate?.toISOString(),
+       'data-ai-hint': 'food item', // Generic hint for example
      };
    });
 
@@ -82,8 +84,9 @@ const MockMessagesView: FC<MockMessagesViewProps> = ({ role }) => {
    const formatRelativeDate = (date: Date | string | undefined): string => {
     if (!date) return '';
     try {
+        // Ensure timestamp is a Date object before formatting
         const dateObj = typeof date === 'string' ? parseISO(date) : date;
-        if (isNaN(dateObj.getTime())) return '';
+        if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) return '';
         return formatDistanceToNowStrict(dateObj, { addSuffix: true, locale: es });
     } catch { return ''; }
    };
@@ -91,7 +94,11 @@ const MockMessagesView: FC<MockMessagesViewProps> = ({ role }) => {
    const getLastMessage = (messages: Message[] | undefined): Message | null => {
         if (!messages || messages.length === 0) return null;
         // Sort by timestamp descending to get the latest
-        return [...messages].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+        return [...messages].sort((a, b) => {
+             const timeA = typeof a.timestamp === 'string' ? parseISO(a.timestamp).getTime() : a.timestamp.getTime();
+             const timeB = typeof b.timestamp === 'string' ? parseISO(b.timestamp).getTime() : b.timestamp.getTime();
+             return timeB - timeA;
+            })[0];
    }
 
   return (

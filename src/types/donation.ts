@@ -10,7 +10,9 @@ export interface Donation {
   id: string;
   itemName: string;
   description?: string;
-  quantity: string;
+  quantity: number; // Total available quantity
+  unit: string; // e.g., 'kg', 'latas', 'unidades', 'bolsas'
+  pricePerUnit?: number; // Price per unit if not free
   expirationDate: Date | string; // Can be Date object or ISO string
   pickupLocation: string;
   pickupInstructions?: string; // New field for pickup details
@@ -23,7 +25,8 @@ export interface Donation {
   deliveredAt?: Date | string;
   validationCode?: string; // Code for validation
   qualityRating?: number; // Rating from 1-5
-  isFree: boolean; // New field to indicate if the donation is free
+  isFree: boolean; // If the donation requires a symbolic payment
   messages?: Message[]; // New field for mock messages
   'data-ai-hint'?: string; // Keep AI hint optional
 }
+

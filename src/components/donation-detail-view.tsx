@@ -6,7 +6,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { format, parseISO, formatDistanceToNowStrict } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { MapPin, Calendar, Package, Info, MessageSquare, Send, User, Building, Bot, ClipboardCheck, Star, HandCoins, BadgePercent } from 'lucide-react';
+import { MapPin, Calendar, Package, Info, MessageSquare, Send, User, Building, Bot, ClipboardCheck, Star, HandCoins, BadgePercent, Box, Weight, Tag } from 'lucide-react'; // Added icons
 
 import type { Donation, Message } from '@/types/donation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -138,8 +138,13 @@ const DonationDetailView: FC<DonationDetailViewProps> = ({ donation, role }) => 
                            </CardDescription>
                          </div>
                     </div>
-                     <Badge variant={donation.isFree ? "secondary" : "outline"} className={`text-sm ${donation.isFree ? 'border-green-500 text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30' : 'border-orange-500 text-orange-700 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30'} flex-shrink-0 mt-1 sm:mt-0`}>
-                        {donation.isFree ? <><BadgePercent className="mr-1 h-4 w-4" /> Gratis</> : <><HandCoins className="mr-1 h-4 w-4" /> Precio Simbólico</>}
+                    {/* Updated Price Badge */}
+                     <Badge variant={donation.isFree ? "secondary" : "outline"} className={`text-sm ${donation.isFree ? 'border-green-500 text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30' : 'border-orange-500 text-orange-700 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30'} flex-shrink-0 mt-1 sm:mt-0 py-1 px-2.5`}>
+                        {donation.isFree ? (
+                            <><BadgePercent className="mr-1 h-4 w-4" /> Gratis</>
+                        ) : (
+                            <><HandCoins className="mr-1 h-4 w-4" /> {donation.pricePerUnit?.toFixed(2)} € / {donation.unit}</>
+                        )}
                     </Badge>
                 </div>
 
@@ -149,12 +154,18 @@ const DonationDetailView: FC<DonationDetailViewProps> = ({ donation, role }) => 
                  <p><span className="font-semibold">Descripción:</span> {donation.description}</p>
              )}
              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
-                <p><span className="font-semibold">Cantidad:</span> {donation.quantity}</p>
-                <p>
-                    <span className="font-semibold">Caducidad:</span> {formatDate(donation.expirationDate)}
+                 {/* Updated Quantity/Unit Display */}
+                <p className="flex items-center gap-1.5">
+                   <Box className="h-4 w-4 text-muted-foreground"/> <span className="font-semibold">Cantidad Total:</span> {donation.quantity} {donation.unit}
+                </p>
+                 {/* Expiration Date */}
+                <p className="flex items-center gap-1.5">
+                   <Calendar className="h-4 w-4 text-muted-foreground"/> <span className="font-semibold">Caducidad:</span> {formatDate(donation.expirationDate)}
                     <span className="text-muted-foreground text-xs ml-1">({formatRelativeDate(donation.expirationDate)})</span>
                 </p>
+                 {/* Posted Date */}
                  <p><span className="font-semibold">Publicado:</span> {formatDate(donation.postedAt)}</p>
+                 {/* Claimed Date */}
                  {donation.claimedAt && (
                     <p><span className="font-semibold">Reclamado:</span> {formatDate(donation.claimedAt)} por {donation.claimedBy}</p>
                  )}
@@ -206,7 +217,7 @@ const DonationDetailView: FC<DonationDetailViewProps> = ({ donation, role }) => 
              <CardDescription className="text-sm">Conversación sobre esta donación.</CardDescription>
           </CardHeader>
           <CardContent className="p-0 flex-grow overflow-hidden">
-             <ScrollArea className="h-[400px] lg:h-full p-4 sm:p-6">
+             <ScrollArea className="h-[400px] lg:h-[calc(100%-150px)] p-4 sm:p-6"> {/* Adjust scroll area height */}
                 <div className="space-y-4">
                  {messages.length === 0 ? (
                      <Alert variant="default" className="bg-secondary/50">
@@ -221,13 +232,11 @@ const DonationDetailView: FC<DonationDetailViewProps> = ({ donation, role }) => 
                         <div
                         key={msg.id}
                         className={`flex items-start gap-3 ${
-                            msg.sender === role ? 'justify-end' : '' // Align user's messages to the right
+                            msg.sender === role ? 'justify-end' : ''
                         }`}
                         >
-                         {/* Avatar on the left for others, right for user */}
                         {msg.sender !== role && (
                              <Avatar className="h-8 w-8 border">
-                                {/* <AvatarImage src="/path/to/avatar.jpg" /> */}
                                 {getSenderAvatar(msg.sender)}
                             </Avatar>
                         )}
@@ -242,7 +251,7 @@ const DonationDetailView: FC<DonationDetailViewProps> = ({ donation, role }) => 
                             }`}
                         >
                             {msg.sender !== 'system' && (
-                                <p className="text-xs font-medium mb-1 text-muted-foreground">
+                                <p className="text-xs font-medium mb-1 ${ msg.sender === role ? 'text-primary-foreground/80' : 'text-muted-foreground' }">
                                      {getSenderName(msg.sender)}
                                  </p>
                              )}

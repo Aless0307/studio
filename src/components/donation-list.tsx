@@ -2,18 +2,18 @@
 "use client";
 
 import type { FC } from 'react';
-import { useState, useEffect } from 'react'; // Import useEffect
-import type { Donation, Message } from '@/types/donation'; // Import Message type
+import { useState, useEffect } from 'react';
+import type { Donation, Message } from '@/types/donation';
 import DonationCard from './donation-card';
 import { Skeleton } from './ui/skeleton';
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"; // Import Card components
+import { Card as SkeletonCard, CardContent as SkeletonCardContent, CardFooter as SkeletonCardFooter, CardHeader as SkeletonCardHeader } from "@/components/ui/card"; // Use aliases for skeleton card
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Import cn utility
+import { cn } from '@/lib/utils';
 
 
-// --- Mock Data (Translated & Expanded) ---
+// --- Mock Data (Translated & Expanded with new fields) ---
 const generateMockMessages = (donationId: string, status: Donation['status']): Message[] => {
   const messages: Message[] = [];
   const baseTime = new Date();
@@ -58,10 +58,11 @@ const generateMockMessages = (donationId: string, status: Donation['status']): M
 };
 
 const generateMockDonations = (count: number): Donation[] => {
-  const items = ['Panes variados', 'Manzanas Frescas Fuji', 'Sopa de Lentejas Enlatada', 'Cartones de Leche Semidesnatada', 'Cajas de Pasta Integral', 'Vasos de Yogur Griego Natural'];
-  const quantities = ['10 bolsas', '5 kg', '24 latas (1 caja)', '20 cartones', '15 cajas', '50 vasos'];
-  const locations = ['Panadería El Sol', 'Frutería La Huerta', 'Almacén Central FoodLink', 'Cafetería El Rincón', 'Mercado Municipal Puesto 5', 'Supermercado La Despensa'];
-  const statuses: Donation['status'][] = ['available', 'available', 'claimed', 'claimed', 'delivered', 'expired', 'available', 'delivered'];
+  const items = ['Panes variados', 'Manzanas Frescas Fuji', 'Sopa de Lentejas Enlatada', 'Cartones de Leche Semidesnatada', 'Cajas de Pasta Integral', 'Vasos de Yogur Griego Natural', 'Croissants y Bollería', 'Plátanos Maduros'];
+  const units = ['bolsas', 'kg', 'latas', 'litros', 'cajas', 'unidades', 'unidades', 'kg']; // Match units to items
+  const quantities = [10, 5, 24, 20, 15, 50, 30, 8]; // Numeric quantities
+  const locations = ['Panadería El Sol', 'Frutería La Huerta', 'Almacén Central FoodLink', 'Cafetería El Rincón', 'Mercado Municipal Puesto 5', 'Supermercado La Despensa', 'Panadería Delicias', 'Frutería Vitalidad'];
+  const statuses: Donation['status'][] = ['available', 'available', 'claimed', 'available', 'delivered', 'expired', 'claimed', 'delivered'];
   const descriptions = [
     'Pan del día anterior, ideal para tostadas o migas.',
     'Manzanas Fuji orgánicas, algunas con pequeñas marcas.',
@@ -69,10 +70,10 @@ const generateMockDonations = (count: number): Donation[] => {
     'Leche UHT semidesnatada, caducidad próxima (5 días).',
     'Penne integral de trigo duro.',
     'Yogur griego natural sin azúcar, bueno por 3 días más.',
-    'Excedente de croissants y bollería del día.',
+    'Excedente de croissants y napolitanas del día.',
     'Caja de plátanos maduros, ideales para batidos o repostería.',
   ];
-   const photoHints = ['bread bakery assortment', 'apples fruit crate', 'lentil soup cans', 'milk cartons shelf', 'pasta box variety', 'yogurt cups plain', 'croissants pastry', 'bananas ripe box']; // AI Hints for picsum
+   const photoHints = ['bread bakery assortment', 'apples fruit crate', 'lentil soup cans', 'milk cartons shelf', 'pasta box variety', 'yogurt cups plain', 'croissants pastry assortment', 'bananas ripe box']; // Updated hints
    const pickupInstructions = [
      'Preguntar por Ana en recepción. L-V 9am-5pm.',
      'Recoger en muelle de carga trasero. Tocar timbre.',
@@ -82,54 +83,60 @@ const generateMockDonations = (count: number): Donation[] => {
      'Ir a atención al cliente. Muelle de descarga disponible.',
      'Preguntar por Luis en obrador. L-S 8am-2pm.',
      'Recoger antes de las 12pm. Muelle trasero.',
-   ]
+   ];
+   const prices = [undefined, 0.5, undefined, 0.2, undefined, 0.1, 0.25, 0.4]; // Example prices per unit
+
 
   return Array.from({ length: count }, (_, i) => {
-    const status = statuses[i % statuses.length];
+    const index = i % items.length; // Use modulo for cycling through data
+    const status = statuses[index];
     const baseDate = new Date();
-    const expirationOffset = status === 'expired' ? -2 : (i % 7) + 1; // Expired 2 days ago or expires in 1-7 days
-    baseDate.setDate(baseDate.getDate() + expirationOffset);
+    const expirationOffset = status === 'expired' ? -2 : (index % 7) + 1;
+    const expirationDate = new Date(baseDate.getTime() + 86400000 * expirationOffset);
 
     const postedDate = new Date();
-    postedDate.setDate(postedDate.getDate() - (i % 5)); // Posted recently
+    postedDate.setDate(postedDate.getDate() - (index % 5));
 
     let claimedDate: Date | undefined = undefined;
     let deliveredDate: Date | undefined = undefined;
 
     if (status === 'claimed' || status === 'delivered') {
-        claimedDate = new Date(postedDate.getTime() + 86400000 * (i % 2 + 1)); // Claimed 1-2 days after post
-        if (claimedDate > new Date()) claimedDate = new Date(postedDate.getTime() + 3600000) // Ensure claimed date is not in future if status is claimed/delivered
+        claimedDate = new Date(postedDate.getTime() + 86400000 * (index % 2 + 1));
+        if (claimedDate > new Date()) claimedDate = new Date(postedDate.getTime() + 3600000);
 
         if (status === 'delivered') {
-            deliveredDate = new Date(claimedDate.getTime() + 86400000 * (i % 3 + 1)); // Delivered 1-3 days after claim
-            if (deliveredDate > new Date()) deliveredDate = new Date(claimedDate.getTime() + 7200000); // Ensure delivered date is not in future
+            deliveredDate = new Date(claimedDate.getTime() + 86400000 * (index % 3 + 1));
+            if (deliveredDate > new Date()) deliveredDate = new Date(claimedDate.getTime() + 7200000);
         }
     }
 
 
     const donationId = `donation-${i + 1}`;
-    const donationStatus = status; // Use the generated status
+    const donationStatus = status;
+    const isFree = prices[index] === undefined; // Determine if free based on price presence
 
     return {
       id: donationId,
-      itemName: items[i % items.length],
-      description: descriptions[i % descriptions.length],
-      quantity: quantities[i % quantities.length],
-      expirationDate: baseDate.toISOString(),
-      pickupLocation: locations[i % locations.length],
-      pickupInstructions: pickupInstructions[i % pickupInstructions.length], // Add instructions
-      photoUrl: `https://picsum.photos/seed/${i + 100}/400/300`, // Use seeded picsum for consistency
-      postedBy: `Empresa ${String.fromCharCode(65 + (i % 5))}`, // Empresa A, B, C...
+      itemName: items[index],
+      description: descriptions[index],
+      quantity: quantities[index], // Use numeric quantity
+      unit: units[index], // Use specific unit
+      pricePerUnit: prices[index], // Assign price
+      expirationDate: expirationDate.toISOString(),
+      pickupLocation: locations[index],
+      pickupInstructions: pickupInstructions[index],
+      photoUrl: `https://picsum.photos/seed/${photoHints[index].replace(/ /g, '_')}/400/300`, // Use hint for more relevant image
+      postedBy: `Empresa ${String.fromCharCode(65 + (index % 5))}`,
       status: donationStatus,
-      claimedBy: status === 'claimed' || status === 'delivered' ? `Org ${i % 3 + 1}` : undefined,
+      claimedBy: status === 'claimed' || status === 'delivered' ? `Org ${index % 3 + 1}` : undefined,
       postedAt: postedDate.toISOString(),
       claimedAt: claimedDate?.toISOString(),
       deliveredAt: deliveredDate?.toISOString(),
-      isFree: i % 4 !== 0, // Roughly 75% are free, 25% might have a symbolic price (indicated in card, not implemented as price yet)
-      messages: generateMockMessages(donationId, donationStatus), // Add mock messages
-      'data-ai-hint': photoHints[i % photoHints.length], // Use relevant hint
-       validationCode: status === 'delivered' || status === 'claimed' ? `VAL${100 + i}`: undefined, // Add validation code for claimed/delivered
-       qualityRating: status === 'delivered' ? (i % 5) + 1 : undefined // Add rating if delivered
+      isFree: isFree, // Set isFree based on price
+      messages: generateMockMessages(donationId, donationStatus),
+      'data-ai-hint': photoHints[index], // Use specific hint
+      validationCode: status === 'delivered' || status === 'claimed' ? `VAL${100 + i}`: undefined,
+      qualityRating: status === 'delivered' ? (index % 5) + 1 : undefined
     };
   });
 };
@@ -137,9 +144,9 @@ const generateMockDonations = (count: number): Donation[] => {
 
 
 interface DonationListProps {
-   listType?: 'available' | 'claimed' | 'history' | 'all'; // Added 'all'
-   role: 'business' | 'organization'; // To control actions like claiming
-   className?: string; // Allow passing custom classes
+   listType?: 'available' | 'claimed' | 'history' | 'all';
+   role: 'business' | 'organization';
+   className?: string;
 }
 
 const DonationList: FC<DonationListProps> = ({ listType = 'available', role, className }) => {
@@ -147,17 +154,15 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  // Simulate fetching data
   useEffect(() => {
     setIsLoading(true);
-    // In a real app, fetch from an API based on listType and role
     console.log(`Buscando donaciones por tipo: ${listType}, rol: ${role}`);
     setTimeout(() => {
-      const mockData = generateMockDonations(12); // Generate more mock donations
+      const mockData = generateMockDonations(12);
 
-      // Filter based on type and role (more specific examples)
       let filteredData = mockData;
-      if (role === 'organization') {
+      // --- Filtering Logic (Keep as is, assuming filtering works with new data structure) ---
+       if (role === 'organization') {
           if (listType === 'available') {
               filteredData = mockData.filter(d => d.status === 'available');
           } else if (listType === 'claimed') {
@@ -182,21 +187,34 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
              filteredData = mockData; //.filter(d => d.postedBy === currentUserBusinessId);
           }
       }
+      // --- End Filtering Logic ---
 
 
       setDonations(filteredData);
       setIsLoading(false);
-    }, 1500); // Simulate network delay
-  }, [listType, role]); // Refetch if listType or role changes
+    }, 1500);
+  }, [listType, role]);
 
-  const handleClaim = (donationId: string) => {
-    console.log(`Reclamando donación ${donationId}`);
-    // Simulate API call to claim
-    // Update the local state optimistically or after API confirmation
+   const handleClaim = (donationId: string, quantityToClaim: number) => {
+    console.log(`Reclamando ${quantityToClaim} unidades de la donación ${donationId}`);
+
     setDonations(prevDonations => {
-       const updatedDonations = prevDonations.map(d =>
-        d.id === donationId ? { ...d, status: 'claimed' as const, claimedBy: 'Tu Organización' } : d
-       );
+       const updatedDonations = prevDonations.map(d => {
+        if (d.id === donationId) {
+            const remainingQuantity = d.quantity - quantityToClaim;
+            // If remaining quantity is 0 or less, mark as claimed fully
+            // Otherwise, just update the quantity (this simple model assumes partial claims remove the listing for simplicity, adjust if needed)
+            return {
+                ...d,
+                // quantity: remainingQuantity > 0 ? remainingQuantity : 0, // Example: Update quantity
+                status: 'claimed' as const, // Mark as claimed regardless of partial/full for now
+                claimedBy: 'Tu Organización', // Assume current user
+                // claimedAt: new Date().toISOString() // Set claim time
+            };
+        }
+        return d;
+       });
+
         // If listType is 'available', filter out the claimed item immediately
        if (listType === 'available') {
             return updatedDonations.filter(d => d.id !== donationId);
@@ -206,28 +224,27 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
     });
      toast({
       title: "¡Donación Reclamada!",
-      description: `Has reclamado exitosamente la donación ID: ${donationId}. Revisa la pestaña 'Mis Reclamadas' para ver detalles y mensajes.`,
+      description: `Has reclamado ${quantityToClaim} unidades de la donación ID: ${donationId}. Revisa la pestaña 'Mis Reclamadas' para ver detalles y mensajes.`,
     });
-    // In a real app, you'd likely refetch or get updated data from the backend
   };
 
   const loadingSkeletons = Array.from({ length: 6 }).map((_, index) => (
-       <Card key={index} className="w-full overflow-hidden shadow-md flex flex-col">
-         <CardHeader className="pb-2">
+       <SkeletonCard key={index} className="w-full overflow-hidden shadow-md flex flex-col">
+         <SkeletonCardHeader className="pb-2">
             <Skeleton className="h-6 w-3/4 mb-1" />
             <Skeleton className="h-4 w-1/2" />
-         </CardHeader>
-          <CardContent className="flex-grow grid gap-3">
+         </SkeletonCardHeader>
+          <SkeletonCardContent className="flex-grow grid gap-3">
              <Skeleton className="h-40 w-full rounded-md" />
              <Skeleton className="h-4 w-5/6" />
              <Skeleton className="h-4 w-3/4" />
              <Skeleton className="h-4 w-4/5" />
              <Skeleton className="h-3 w-1/3 mt-1" />
-          </CardContent>
-           <CardFooter>
+          </SkeletonCardContent>
+           <SkeletonCardFooter>
              <Skeleton className="h-10 w-full" />
-           </CardFooter>
-       </Card>
+           </SkeletonCardFooter>
+       </SkeletonCard>
     ));
 
 
@@ -261,10 +278,10 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
       {donations.map(donation => (
         <DonationCard
           key={donation.id}
-          donation={donation} // Pass full donation object
-          onClaim={handleClaim}
-          isClaimable={role === 'organization' && donation.status === 'available'} // Only orgs can claim available items
-          showDetailsLink={role === 'organization' && donation.status === 'claimed'} // Show details link for claimed items for orgs
+          donation={donation}
+          onClaim={handleClaim} // Pass the updated handler
+          isClaimable={role === 'organization' && donation.status === 'available'}
+          showDetailsLink={role === 'organization' && donation.status === 'claimed'}
         />
       ))}
     </div>

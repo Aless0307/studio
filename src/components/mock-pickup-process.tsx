@@ -3,7 +3,7 @@
 
 import type { FC } from 'react';
 import { Check, Clock, MapPin, MessageSquare, Package, Star, HelpCircle } from 'lucide-react';
-import type { Donation } from '@/types/donation';
+import type { Donation } from '@/types/donation'; // Use updated Donation type
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from './ui/button';
@@ -80,20 +80,17 @@ const MockPickupProcess: FC<MockPickupProcessProps> = ({ donation, role }) => {
                     }`}>
                      <step.icon className="h-4 w-4" />
                  </div>
-                {/* <Badge variant={
-                    step.status === 'completed' ? 'default' :
-                    step.status === 'current' ? 'secondary' :
-                    'outline'
-                  } className="mt-1 text-xs px-1 py-0 h-4">
-                    {step.status === 'completed' ? 'Hecho' : step.status === 'current' ? 'Actual' : 'Pendiente'}
-                  </Badge> */}
               </div>
               {/* Step Details */}
               <div className="flex-1 pt-1">
-                <h4 className={`font-medium ${step.status === 'current' ? 'text-accent-foreground' : step.status === 'pending' ? 'text-muted-foreground' : 'text-foreground'}`}>
+                <h4 className={`font-medium ${
+                    step.status === 'completed' ? 'text-foreground' :
+                    step.status === 'current' ? 'text-accent-foreground font-semibold' :
+                    'text-muted-foreground'
+                }`}>
                   {step.title}
                 </h4>
-                <p className="text-sm text-muted-foreground">{step.description}</p>
+                <p className={`text-sm ${step.status === 'pending' ? 'text-muted-foreground/70' : 'text-muted-foreground'}`}>{step.description}</p>
                  {step.action && <div className="mt-1">{step.action}</div>}
               </div>
             </div>

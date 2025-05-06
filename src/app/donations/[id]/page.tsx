@@ -17,11 +17,12 @@ const fetchMockDonationById = (id: string): Donation | null => {
           id: `donation-val-1`,
           itemName: 'Sopa de Lentejas Enlatada',
           description: 'Sopa casera, lista para calentar.',
-          quantity: '24 latas (1 caja)',
+          quantity: 24, // Numeric quantity
+          unit: 'latas', // Unit
           expirationDate: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(),
           pickupLocation: 'Almacén Central FoodLink',
           pickupInstructions: 'Entrada por puerta lateral (indicada). Aparcamiento disponible. L-V 9am-5pm.',
-          photoUrl: `https://picsum.photos/seed/102/400/300`,
+          photoUrl: `https://picsum.photos/seed/lentil_soup_cans/400/300`, // Seeded with hint
           postedBy: `Empresa C`,
           status: 'claimed' as const,
           claimedBy: `Tu Organización`,
@@ -30,13 +31,14 @@ const fetchMockDonationById = (id: string): Donation | null => {
           deliveredAt: undefined,
           validationCode: 'VAL101',
           qualityRating: undefined,
-          isFree: true,
+          isFree: true, // Explicitly free
+          pricePerUnit: undefined, // No price
           messages: [
               { id: 'val-msg-1', sender: 'system', text: 'Donación publicada.', timestamp: new Date(new Date().setDate(new Date().getDate() - 2)) },
               { id: 'val-msg-2', sender: 'organization', text: '¡Reclamada! ¿Instrucciones para recoger?', timestamp: new Date(new Date().setDate(new Date().getDate() - 1)) },
               { id: 'val-msg-3', sender: 'business', text: 'Claro, usad la puerta lateral indicada. Podéis pasar de 9 a 5.', timestamp: new Date(new Date().setDate(new Date().getDate() - 1) + 3600000) },
           ],
-          'data-ai-hint': 'lentil soup cans' // Relevant hint already present
+          'data-ai-hint': 'lentil soup cans'
       };
     }
     // Add more mock donations or logic here if needed
@@ -45,23 +47,25 @@ const fetchMockDonationById = (id: string): Donation | null => {
             id: 'donation-3',
             itemName: 'Sopa de Lentejas Enlatada',
             description: 'Sopa de lentejas casera, lista para calentar.',
-            quantity: '24 latas (1 caja)',
-            expirationDate: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString(), // Expires in 4 days (from generation logic)
+            quantity: 24, // Numeric quantity
+            unit: 'latas', // Unit
+            expirationDate: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString(),
             pickupLocation: 'Almacén Central FoodLink',
             pickupInstructions: 'Entrada por puerta lateral (indicada). Aparcamiento disponible.',
-            photoUrl: 'https://picsum.photos/seed/102/400/300',
+            photoUrl: 'https://picsum.photos/seed/lentil_soup_cans/400/300', // Seeded with hint
             postedBy: 'Empresa C',
             status: 'claimed',
             claimedBy: 'Org 1',
-            postedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), // Posted 2 days ago
-            claimedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // Claimed 1 day ago
-            isFree: true,
+            postedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(),
+            claimedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
+            isFree: true, // Explicitly free
+            pricePerUnit: undefined, // No price
             messages: [
                 { id: 'd3-msg-1', sender: 'system', text: 'Donación publicada por Empresa C.', timestamp: new Date(new Date().setDate(new Date().getDate() - 2))},
                 { id: 'd3-msg-2', sender: 'organization', text: 'Hola Empresa C, hemos reclamado la sopa. ¿Podemos pasar el viernes por la mañana?', timestamp: new Date(new Date().setDate(new Date().getDate() - 1))},
                 { id: 'd3-msg-3', sender: 'business', text: '¡Perfecto! Viernes por la mañana está bien. Preguntad por Marta.', timestamp: new Date(new Date().setDate(new Date().getDate() - 1) + 1800000)},
             ],
-            'data-ai-hint': 'lentil soup cans' // Relevant hint already present
+            'data-ai-hint': 'lentil soup cans'
             };
      }
 
@@ -76,8 +80,6 @@ interface DonationPageProps {
 
 const DonationPage: FC<DonationPageProps> = ({ params }) => {
   const donationId = params.id;
-  // Fetch donation data based on donationId
-  // For now, we use mock data
   const donation = fetchMockDonationById(donationId);
 
   if (!donation) {
@@ -141,3 +143,4 @@ export default DonationPage;
 //     id: id,
 //   }));
 // }
+

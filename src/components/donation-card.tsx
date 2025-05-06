@@ -1,10 +1,11 @@
 
 import type { FC } from 'react';
 import Image from 'next/image';
+import { useState } from 'react'; // Import useState
 import { format, parseISO, formatDistanceToNowStrict } from 'date-fns';
-import { es } from 'date-fns/locale'; // Import Spanish locale
-import { Calendar, MapPin, Package, Info, Recycle, CheckCircle, AlertTriangle, Clock, MessageSquare, Eye, HandCoins, BadgePercent } from 'lucide-react';
-import Link from 'next/link'; // Import Link for navigation
+import { es } from 'date-fns/locale';
+import { Calendar, MapPin, Package, Info, Recycle, CheckCircle, AlertTriangle, Clock, MessageSquare, Eye, HandCoins, BadgePercent, Minus, Plus, ShoppingCart } from 'lucide-react'; // Added icons
+import Link from 'next/link';
 
 import type { Donation } from '@/types/donation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,52 +13,52 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Separator } from './ui/separator';
-
+import { Input } from './ui/input'; // Import Input
 
 interface DonationCardProps {
   donation: Donation;
-  onClaim?: (donationId: string) => void; // Callback when 'Claim' button is clicked
-  isClaimable?: boolean; // Determines if the claim button should be shown
-  showDetailsLink?: boolean; // Determines if the details/messages link should be shown
+  onClaim?: (donationId: string, quantityToClaim: number) => void; // Callback with quantity
+  isClaimable?: boolean;
+  showDetailsLink?: boolean;
 }
 
 const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = false, showDetailsLink = false }) => {
+  const [quantityToClaim, setQuantityToClaim] = useState(1); // State for quantity selection
 
   const formatDate = (date: Date | string | undefined): string => {
-    if (!date) return 'N/D'; // Not Available
+    if (!date) return 'N/D';
     try {
       const dateObj = typeof date === 'string' ? parseISO(date) : date;
-      // Check if date is valid before formatting
       if (isNaN(dateObj.getTime())) return 'Fecha Inválida';
-      return format(dateObj, 'dd MMM, yyyy', { locale: es }); // Use Spanish locale
+      return format(dateObj, 'dd MMM, yyyy', { locale: es });
     } catch (error) {
-      console.error("Error al formatear fecha:", error); // Remains in Spanish
-      return 'Fecha inválida'; // Remains in Spanish
+      console.error("Error al formatear fecha:", error);
+      return 'Fecha inválida';
     }
   };
 
    const formatRelativeDate = (date: Date | string | undefined): string => {
-    if (!date) return 'hace un tiempo'; // Remains in Spanish fallback
+    if (!date) return 'hace un tiempo';
     try {
       const dateObj = typeof date === 'string' ? parseISO(date) : date;
        if (isNaN(dateObj.getTime())) return 'Fecha Inválida';
-      return formatDistanceToNowStrict(dateObj, { addSuffix: true, locale: es }); // Use Spanish locale
+      return formatDistanceToNowStrict(dateObj, { addSuffix: true, locale: es });
     } catch (error) {
-      console.error("Error al formatear fecha relativa:", error); // Remains in Spanish error
-      return 'Fecha inválida'; // Remains in Spanish
+      console.error("Error al formatear fecha relativa:", error);
+      return 'Fecha inválida';
     }
    };
 
   const getStatusBadgeVariant = (status: Donation['status']): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
       case 'available':
-        return 'default'; // Use primary color (green)
+        return 'default';
       case 'claimed':
-        return 'secondary'; // Use secondary (beige/gray)
+        return 'secondary';
       case 'delivered':
-        return 'outline'; // Use outline (neutral)
+        return 'outline';
       case 'expired':
-        return 'destructive'; // Use destructive (red)
+        return 'destructive';
       default:
         return 'secondary';
     }
@@ -83,12 +84,12 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
         case 'available': return 'Disponible';
         case 'claimed': return 'Reclamado';
         case 'delivered': return 'Entregado';
-        case 'expired': return 'Caducado'; // Changed from Expirado
+        case 'expired': return 'Caducado';
         default: return status;
      }
    };
 
-   const PriceBadge: FC<{ isFree: boolean }> = ({ isFree }) => (
+   const PriceBadge: FC<{ isFree: boolean; pricePerUnit?: number; unit?: string }> = ({ isFree, pricePerUnit, unit }) => (
      <Badge variant={isFree ? "secondary" : "outline"} className={`text-xs ${isFree ? 'border-green-500 text-green-700 dark:text-green-400 bg-green-100 dark:bg-green-900/30' : 'border-orange-500 text-orange-700 dark:text-orange-400 bg-orange-100 dark:bg-orange-900/30'}`}>
         {isFree ? (
              <>
@@ -96,11 +97,27 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
              </>
         ) : (
             <>
-                 <HandCoins className="mr-1 h-3 w-3" /> Precio Simbólico
+                 <HandCoins className="mr-1 h-3 w-3" /> {pricePerUnit?.toFixed(2)} € / {unit || 'unidad'}
              </>
         )}
      </Badge>
    );
+
+   const handleQuantityChange = (change: number) => {
+    setQuantityToClaim(prev => {
+        const newValue = prev + change;
+        if (newValue < 1) return 1; // Minimum 1
+        if (newValue > donation.quantity) return donation.quantity; // Maximum available
+        return newValue;
+    });
+   };
+
+   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+       let value = parseInt(e.target.value, 10);
+       if (isNaN(value) || value < 1) value = 1;
+       if (value > donation.quantity) value = donation.quantity;
+       setQuantityToClaim(value);
+   };
 
 
   return (
@@ -109,11 +126,11 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
         <div className="flex justify-between items-start gap-2 mb-1">
            <CardTitle className="text-base font-semibold flex items-center gap-2 text-foreground">
               <Package className="h-5 w-5 text-primary flex-shrink-0"/>
-              <span className="line-clamp-2">{donation.itemName}</span> {/* Allow wrapping */}
+              <span className="line-clamp-2">{donation.itemName}</span>
            </CardTitle>
            <Badge variant={getStatusBadgeVariant(donation.status)} className="capitalize whitespace-nowrap flex-shrink-0 flex items-center text-xs px-2 py-0.5">
              {getStatusIcon(donation.status)}
-             {getStatusText(donation.status)} {/* Remains in Spanish */}
+             {getStatusText(donation.status)}
            </Badge>
         </div>
          <div className="flex justify-between items-center mt-1">
@@ -129,7 +146,7 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
-             <PriceBadge isFree={donation.isFree} />
+             <PriceBadge isFree={donation.isFree} pricePerUnit={donation.pricePerUnit} unit={donation.unit} />
          </div>
 
         {donation.description && (
@@ -141,12 +158,12 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
            <div className="relative h-40 w-full rounded-md overflow-hidden bg-muted mb-2">
              <Image
                src={donation.photoUrl}
-               alt={`Foto de ${donation.itemName}`} // Spanish alt text
+               alt={`Foto de ${donation.itemName}`}
                fill={true}
                style={{ objectFit: 'cover' }}
                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-               data-ai-hint={donation['data-ai-hint'] || 'food donation'} // Use hint from data or default
-               priority={false} // Lower priority for list images
+               data-ai-hint={donation['data-ai-hint'] || 'food donation'}
+               priority={false}
              />
            </div>
          ) : (
@@ -165,7 +182,7 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
                  </TooltipContent>
              </Tooltip>
            </TooltipProvider>
-           <span className="truncate">Caduca: {formatDate(donation.expirationDate)} ({formatRelativeDate(donation.expirationDate)})</span> {/* Combined date + relative */}
+           <span className="truncate">Caduca: {formatDate(donation.expirationDate)} ({formatRelativeDate(donation.expirationDate)})</span>
 
            <TooltipProvider>
              <Tooltip>
@@ -177,7 +194,8 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
                  </TooltipContent>
              </Tooltip>
            </TooltipProvider>
-           <span className="truncate">Cantidad: {donation.quantity}</span> {/* Remains in Spanish */}
+           {/* Updated Quantity Display */}
+           <span className="truncate">Disponibles: {donation.quantity} {donation.unit}</span>
 
            <TooltipProvider>
              <Tooltip>
@@ -189,60 +207,82 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
                  </TooltipContent>
              </Tooltip>
            </TooltipProvider>
-           <span className="truncate">{donation.pickupLocation}</span> {/* Removed label */}
+           <span className="truncate">{donation.pickupLocation}</span>
         </div>
 
       </CardContent>
        <Separator className="my-0 mx-4"/>
-      <CardFooter className="p-3 flex justify-between items-center gap-2">
-         {/* Conditional Rendering based on status and props */}
+      <CardFooter className="p-3 flex flex-col gap-2">
+         {/* Claim Section (if applicable) */}
         {isClaimable && donation.status === 'available' && onClaim && (
-          <Button onClick={() => onClaim(donation.id)} className="w-full bg-accent text-accent-foreground hover:bg-accent/90 text-xs h-8">
-            Reclamar Donación {/* Remains in Spanish */}
-          </Button>
+          <div className="w-full space-y-2">
+             <div className="flex items-center justify-center gap-2">
+                  <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleQuantityChange(-1)} disabled={quantityToClaim <= 1}>
+                     <Minus className="h-4 w-4" />
+                  </Button>
+                  <Input
+                     type="number"
+                     className="h-7 w-16 text-center px-1"
+                     value={quantityToClaim}
+                     onChange={handleInputChange}
+                     min={1}
+                     max={donation.quantity}
+                   />
+                   <span className="text-xs text-muted-foreground ml-1">{donation.unit}</span>
+                  <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => handleQuantityChange(1)} disabled={quantityToClaim >= donation.quantity}>
+                     <Plus className="h-4 w-4" />
+                  </Button>
+             </div>
+              <Button onClick={() => onClaim(donation.id, quantityToClaim)} className="w-full bg-accent text-accent-foreground hover:bg-accent/90 text-xs h-8">
+                 <ShoppingCart className="mr-1 h-3 w-3"/> Reclamar {quantityToClaim} {donation.unit}
+              </Button>
+          </div>
         )}
 
+         {/* Details Link (if applicable) */}
          {showDetailsLink && donation.status === 'claimed' && (
            <Link href={`/donations/${donation.id}`} passHref legacyBehavior>
              <Button variant="outline" className="w-full text-xs h-8">
-                <MessageSquare className="mr-1 h-3 w-3" /> Ver Detalles / Mensajes {/* Spanish */}
+                <MessageSquare className="mr-1 h-3 w-3" /> Ver Detalles / Mensajes
              </Button>
            </Link>
         )}
 
+         {/* Status Messages */}
          {donation.status === 'claimed' && !showDetailsLink && (
             <p className="text-xs text-center w-full text-muted-foreground italic">
-              Reclamado por {donation.claimedBy || 'una organización'} {donation.claimedAt ? formatRelativeDate(donation.claimedAt) : ''} {/* Spanish */}
+              Reclamado por {donation.claimedBy || 'una organización'} {donation.claimedAt ? formatRelativeDate(donation.claimedAt) : ''}
             </p>
          )}
           {donation.status === 'delivered' && (
             <p className="text-xs text-center w-full text-green-700 dark:text-green-400 flex items-center justify-center gap-1">
-              <CheckCircle className="h-3 w-3"/> Entregado Correctamente {/* Spanish */}
+              <CheckCircle className="h-3 w-3"/> Entregado Correctamente
             </p>
           )}
            {donation.status === 'expired' && (
             <p className="text-xs text-center w-full text-destructive flex items-center justify-center gap-1">
-                <AlertTriangle className="h-3 w-3"/> Esta donación ha caducado. {/* Spanish */}
+                <AlertTriangle className="h-3 w-3"/> Esta donación ha caducado.
             </p>
            )}
 
-          {/* Link to view details - could be always visible or based on role/status */}
+          {/* Fallback View Details Icon */}
          {donation.status !== 'available' && !showDetailsLink && (
-             <TooltipProvider>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        {/* Using a placeholder Link for now, replace with actual navigation */}
-                        <Link href={`/donations/${donation.id}`} passHref legacyBehavior>
-                             <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
-                                 <Eye className="h-4 w-4" />
-                             </Button>
-                         </Link>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                         <p>Ver Detalles</p>
-                    </TooltipContent>
-                </Tooltip>
-             </TooltipProvider>
+             <div className="w-full flex justify-end"> {/* Align icon to the right */}
+                 <TooltipProvider>
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Link href={`/donations/${donation.id}`} passHref legacyBehavior>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-primary">
+                                    <Eye className="h-4 w-4" />
+                                </Button>
+                            </Link>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>Ver Detalles</p>
+                        </TooltipContent>
+                    </Tooltip>
+                </TooltipProvider>
+             </div>
          )}
       </CardFooter>
     </Card>
