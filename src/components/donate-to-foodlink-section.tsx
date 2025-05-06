@@ -1,26 +1,48 @@
-
 "use client";
 
 import type { FC } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Heart, DollarSign } from 'lucide-react';
+import { Heart, DollarSign, Loader2 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
 interface DonateToFoodlinkSectionProps {}
 
 const DonateToFoodlinkSection: FC<DonateToFoodlinkSectionProps> = ({}) => {
   const { toast } = useToast();
+  const [isLoadingUnique, setIsLoadingUnique] = useState(false);
+  const [isLoadingMonthly, setIsLoadingMonthly] = useState(false);
 
-  const handleDonationClick = (type: string) => {
-    // Simulate donation action (in a real app, this would integrate with a payment provider)
-    console.log(`Initiating ${type} donation...`);
+  const handleDonationClick = async (type: 'única' | 'mensual') => {
+    const setLoading = type === 'única' ? setIsLoadingUnique : setIsLoadingMonthly;
+    setLoading(true);
+
+    // Show initial processing toast
     toast({
-      title: "¡Gracias por tu interés!",
-      description: `Actualmente, las donaciones directas a FoodLink no están habilitadas en esta demostración. ¡Agradecemos tu apoyo! (${type})`,
+      title: "Procesando tu donación...",
+      description: `Estamos simulando el proceso para tu donación ${type}.`,
       variant: "default",
-      duration: 5000,
     });
+
+    // Simulate API call / processing delay
+    await new Promise(resolve => setTimeout(resolve, 2000)); // 2 second delay
+
+    setLoading(false);
+
+    // Show success toast
+    toast({
+      title: `¡Gracias por tu generosidad! (${type})`,
+      description: type === 'única'
+        ? "Tu donación única simulada ha sido registrada. ¡Cada aporte cuenta!"
+        : "¡Hemos configurado tu donación mensual simulada! Tu apoyo continuo es invaluable.",
+      variant: "default", // Or maybe a different variant for success if defined
+      duration: 7000, // Show longer
+       // You could add an action button here if needed, e.g., view donation history (mocked)
+       // action: <ToastAction altText="Ver historial">Ver historial</ToastAction>,
+    });
+
+    console.log(`Simulated ${type} donation complete.`);
   };
 
   return (
@@ -35,18 +57,30 @@ const DonateToFoodlinkSection: FC<DonateToFoodlinkSectionProps> = ({}) => {
       <CardContent className="flex flex-col sm:flex-row justify-center items-center gap-4 px-6 pb-6">
         <Button
           size="lg"
-          className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90 shadow-md"
+          className="w-full sm:w-auto bg-accent text-accent-foreground hover:bg-accent/90 shadow-md transition-all"
           onClick={() => handleDonationClick('única')}
+          disabled={isLoadingUnique || isLoadingMonthly}
         >
-          <DollarSign className="mr-2 h-5 w-5" /> Donación Única (Simulado)
+          {isLoadingUnique ? (
+             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+          ) : (
+            <DollarSign className="mr-2 h-5 w-5" />
+          )}
+           {isLoadingUnique ? 'Procesando...' : 'Donación Única (Simulado)'}
         </Button>
         <Button
            size="lg"
            variant="outline"
-           className="w-full sm:w-auto shadow-sm"
+           className="w-full sm:w-auto shadow-sm transition-all"
            onClick={() => handleDonationClick('mensual')}
+           disabled={isLoadingUnique || isLoadingMonthly}
          >
-           <Heart className="mr-2 h-5 w-5" /> Donar Mensualmente (Simulado)
+           {isLoadingMonthly ? (
+             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+           ) : (
+             <Heart className="mr-2 h-5 w-5" />
+           )}
+            {isLoadingMonthly ? 'Procesando...' : 'Donar Mensualmente (Simulado)'}
          </Button>
       </CardContent>
        {/* Optional Footer */}
