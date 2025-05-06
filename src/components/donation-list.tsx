@@ -127,7 +127,7 @@ const generateMockDonations = (count: number): Donation[] => {
       deliveredAt: deliveredDate?.toISOString(),
       isFree: i % 4 !== 0, // Roughly 75% are free, 25% might have a symbolic price (indicated in card, not implemented as price yet)
       messages: generateMockMessages(donationId, donationStatus), // Add mock messages
-      'data-ai-hint': photoHints[i % photoHints.length],
+      'data-ai-hint': photoHints[i % photoHints.length], // Use relevant hint
        validationCode: status === 'delivered' || status === 'claimed' ? `VAL${100 + i}`: undefined, // Add validation code for claimed/delivered
        qualityRating: status === 'delivered' ? (i % 5) + 1 : undefined // Add rating if delivered
     };
@@ -151,7 +151,7 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
   useEffect(() => {
     setIsLoading(true);
     // In a real app, fetch from an API based on listType and role
-    console.log(`Buscando donaciones por tipo: ${listType}, rol: ${role}`); // Log remains in Spanish
+    console.log(`Buscando donaciones por tipo: ${listType}, rol: ${role}`);
     setTimeout(() => {
       const mockData = generateMockDonations(12); // Generate more mock donations
 
@@ -190,12 +190,12 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
   }, [listType, role]); // Refetch if listType or role changes
 
   const handleClaim = (donationId: string) => {
-    console.log(`Reclamando donación ${donationId}`); // Log remains in Spanish
+    console.log(`Reclamando donación ${donationId}`);
     // Simulate API call to claim
     // Update the local state optimistically or after API confirmation
     setDonations(prevDonations => {
        const updatedDonations = prevDonations.map(d =>
-        d.id === donationId ? { ...d, status: 'claimed' as const, claimedBy: 'Tu Organización' } : d // Example update, remains in Spanish
+        d.id === donationId ? { ...d, status: 'claimed' as const, claimedBy: 'Tu Organización' } : d
        );
         // If listType is 'available', filter out the claimed item immediately
        if (listType === 'available') {
@@ -205,8 +205,8 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
 
     });
      toast({
-      title: "¡Donación Reclamada!", // Remains in Spanish
-      description: `Has reclamado exitosamente la donación ID: ${donationId}. Revisa la pestaña 'Mis Reclamadas' para ver detalles y mensajes.`, // Updated description in Spanish
+      title: "¡Donación Reclamada!",
+      description: `Has reclamado exitosamente la donación ID: ${donationId}. Revisa la pestaña 'Mis Reclamadas' para ver detalles y mensajes.`,
     });
     // In a real app, you'd likely refetch or get updated data from the backend
   };
@@ -244,12 +244,12 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
         <div className="flex justify-center items-center min-h-[40vh] p-4 md:p-6">
              <Alert className="max-w-md text-center bg-card border-border shadow-sm">
                 <Info className="h-5 w-5 stroke-primary" />
-                <AlertTitle className="font-semibold text-lg">No Hay Donaciones Aquí</AlertTitle> {/* Translated */}
+                <AlertTitle className="font-semibold text-lg">No Hay Donaciones Aquí</AlertTitle>
                 <AlertDescription className="text-muted-foreground">
                     {listType === 'available' && "¡Parece que todas las donaciones han sido reclamadas! Vuelve más tarde."}
                     {listType === 'claimed' && "No tienes donaciones reclamadas pendientes."}
                     {listType === 'history' && "No hay historial de donaciones todavía."}
-                    {listType === 'all' && "No se encontraron donaciones."} {/* Translated */}
+                    {listType === 'all' && "No se encontraron donaciones."}
                  </AlertDescription>
             </Alert>
         </div>

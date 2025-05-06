@@ -11,28 +11,28 @@ import MockPickupProcess from "@/components/mock-pickup-process"; // Import the 
 // Mock donation for validation/rating example (adjust as needed based on DonationList updates)
 const mockDonationForValidation = {
   id: `donation-val-1`,
-  itemName: 'Sopa de Lentejas Enlatada', // Updated mock item name
-  description: 'Sopa casera, lista para calentar.', // Updated description
-  quantity: '24 latas (1 caja)', // Updated quantity
+  itemName: 'Sopa de Lentejas Enlatada',
+  description: 'Sopa casera, lista para calentar.',
+  quantity: '24 latas (1 caja)',
   expirationDate: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(), // Expires in 3 days
-  pickupLocation: 'Almacén Central FoodLink', // Updated location
+  pickupLocation: 'Almacén Central FoodLink',
   pickupInstructions: 'Entrada por puerta lateral (indicada). Aparcamiento disponible. L-V 9am-5pm.',
   photoUrl: `https://picsum.photos/seed/102/400/300`,
-  postedBy: `Empresa C`, // Remains the same
-  status: 'claimed' as const, // Keep as claimed for example
-  claimedBy: `Tu Organización` , // Remains the same
+  postedBy: `Empresa C`,
+  status: 'claimed' as const,
+  claimedBy: `Tu Organización` ,
   postedAt: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), // Posted 2 days ago
   claimedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // Claimed yesterday
   deliveredAt: undefined,
-  validationCode: 'VAL101', // Example validation code (matches generation logic)
-  qualityRating: undefined, // Not yet rated
-  isFree: true, // Assuming this one is free
-  messages: [ // Add some mock messages for this specific donation
+  validationCode: 'VAL101',
+  qualityRating: undefined,
+  isFree: true,
+  messages: [
       { id: 'val-msg-1', sender: 'system', text: 'Donación publicada.', timestamp: new Date(new Date().setDate(new Date().getDate() - 2)) },
       { id: 'val-msg-2', sender: 'organization', text: '¡Reclamada! ¿Instrucciones para recoger?', timestamp: new Date(new Date().setDate(new Date().getDate() - 1)) },
       { id: 'val-msg-3', sender: 'business', text: 'Claro, usad la puerta lateral indicada. Podéis pasar de 9 a 5.', timestamp: new Date(new Date().setDate(new Date().getDate() - 1) + 3600000) },
   ],
-  'data-ai-hint': 'lentil soup cans'
+  'data-ai-hint': 'lentil soup cans' // Relevant hint already present
 };
 
 
@@ -45,10 +45,10 @@ export default function Home() {
           {/* Role Switcher */}
           <TabsList className="grid w-full grid-cols-2 md:w-1/2 lg:w-1/3 mx-auto mb-8 bg-muted/80 p-1 rounded-lg shadow-inner">
             <TabsTrigger value="organization" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-md transition-all duration-200 ease-in-out flex items-center justify-center gap-2 py-2 text-sm font-medium">
-               <HeartHandshake className="h-4 w-4"/> Organización Benéfica {/* Updated Text */}
+               <HeartHandshake className="h-4 w-4"/> Organización Benéfica
             </TabsTrigger>
             <TabsTrigger value="business" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md rounded-md transition-all duration-200 ease-in-out flex items-center justify-center gap-2 py-2 text-sm font-medium">
-                <Building className="h-4 w-4"/> Empresa Donante {/* Updated Text */}
+                <Building className="h-4 w-4"/> Empresa Donante
             </TabsTrigger>
           </TabsList>
 
@@ -147,7 +147,7 @@ export default function Home() {
         </Tabs>
       </main>
       <footer className="py-6 text-center text-sm text-muted-foreground border-t bg-card mt-12">
-        © {new Date().getFullYear()} Food Link. Conectando excedentes con necesidad. Todos los derechos reservados. {/* Spanish */}
+        © {new Date().getFullYear()} Food Link. Conectando excedentes con necesidad. Todos los derechos reservados.
       </footer>
     </div>
   );

@@ -36,7 +36,7 @@ const fetchMockDonationById = (id: string): Donation | null => {
               { id: 'val-msg-2', sender: 'organization', text: '¡Reclamada! ¿Instrucciones para recoger?', timestamp: new Date(new Date().setDate(new Date().getDate() - 1)) },
               { id: 'val-msg-3', sender: 'business', text: 'Claro, usad la puerta lateral indicada. Podéis pasar de 9 a 5.', timestamp: new Date(new Date().setDate(new Date().getDate() - 1) + 3600000) },
           ],
-          'data-ai-hint': 'lentil soup cans'
+          'data-ai-hint': 'lentil soup cans' // Relevant hint already present
       };
     }
     // Add more mock donations or logic here if needed
@@ -61,7 +61,7 @@ const fetchMockDonationById = (id: string): Donation | null => {
                 { id: 'd3-msg-2', sender: 'organization', text: 'Hola Empresa C, hemos reclamado la sopa. ¿Podemos pasar el viernes por la mañana?', timestamp: new Date(new Date().setDate(new Date().getDate() - 1))},
                 { id: 'd3-msg-3', sender: 'business', text: '¡Perfecto! Viernes por la mañana está bien. Preguntad por Marta.', timestamp: new Date(new Date().setDate(new Date().getDate() - 1) + 1800000)},
             ],
-            'data-ai-hint': 'lentil soup cans'
+            'data-ai-hint': 'lentil soup cans' // Relevant hint already present
             };
      }
 
