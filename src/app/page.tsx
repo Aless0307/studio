@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Building, HeartHandshake, ListChecks, MessageSquare, PackagePlus, History, LayoutGrid } from 'lucide-react'; // Import more icons
 import MockMessagesView from "@/components/mock-messages-view"; // Import the new messages component
 import MockPickupProcess from "@/components/mock-pickup-process"; // Import the pickup process component
+import DonateToFoodlinkSection from "@/components/donate-to-foodlink-section"; // Import the new donation section
 import type { Donation } from "@/types/donation"; // Import Donation type
 
 // Mock donation for validation/rating example (adjust as needed based on DonationList updates)
@@ -150,7 +151,11 @@ export default function Home() {
           </TabsContent>
         </Tabs>
       </main>
-      <footer className="py-6 text-center text-sm text-muted-foreground border-t bg-card mt-12">
+       {/* Donate to FoodLink Section */}
+      <div className="container mx-auto px-4 md:px-6 mb-12">
+        <DonateToFoodlinkSection />
+      </div>
+      <footer className="py-6 text-center text-sm text-muted-foreground border-t bg-card mt-auto">
         © {new Date().getFullYear()} Food Link. Conectando excedentes con necesidad. Todos los derechos reservados.
       </footer>
     </div>
