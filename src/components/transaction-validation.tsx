@@ -16,7 +16,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Form,
   FormControl,
-  FormDescription, // Added FormDescription import
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -34,7 +34,7 @@ interface TransactionValidationProps {
 
 // --- Business Validation Form ---
 const validationSchema = z.object({
-  validationCode: z.string().min(4, { message: "Code must be at least 4 characters." }).max(10, { message: "Code cannot exceed 10 characters." }),
+  validationCode: z.string().min(4, { message: "El código debe tener al menos 4 caracteres." }).max(10, { message: "El código no puede exceder los 10 caracteres." }),
 });
 type ValidationFormData = z.infer<typeof validationSchema>;
 
@@ -57,19 +57,19 @@ const BusinessValidationForm: FC<{ donation: Donation, onSubmit: (code: string) 
           name="validationCode"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="flex items-center gap-1"><QrCode className="h-4 w-4"/>Enter Validation Code</FormLabel>
+              <FormLabel className="flex items-center gap-1"><QrCode className="h-4 w-4"/>Ingresa el Código de Validación</FormLabel>
               <FormControl>
-                <Input placeholder="Code provided by organization" {...field} />
+                <Input placeholder="Código proporcionado por la organización" {...field} />
               </FormControl>
               <FormDescription>
-                Confirm delivery by entering the code from the recipient.
+                Confirma la entrega ingresando el código del receptor.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Validating..." : "Validate Delivery"}
+          {form.formState.isSubmitting ? "Validando..." : "Validar Entrega"}
         </Button>
       </form>
     </Form>
@@ -79,7 +79,7 @@ const BusinessValidationForm: FC<{ donation: Donation, onSubmit: (code: string) 
 // --- Organization Rating Form ---
 const ratingSchema = z.object({
   rating: z.string().refine(val => ['1', '2', '3', '4', '5'].includes(val), {
-      message: "Please select a rating.",
+      message: "Por favor selecciona una calificación.",
   }),
 });
 type RatingFormData = z.infer<typeof ratingSchema>;
@@ -95,6 +95,14 @@ const OrganizationRatingForm: FC<{ donation: Donation, onSubmit: (rating: number
      form.reset(); // Optionally reset after submit
   };
 
+  const ratingLabels: { [key: number]: string } = {
+      1: 'Mala',
+      2: 'Regular',
+      3: 'Buena',
+      4: 'Muy Buena',
+      5: 'Excelente',
+  };
+
   return (
      <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -103,7 +111,7 @@ const OrganizationRatingForm: FC<{ donation: Donation, onSubmit: (rating: number
             name="rating"
             render={({ field }) => (
                 <FormItem className="space-y-3">
-                <FormLabel className="flex items-center gap-1"><Star className="h-4 w-4"/>Rate Donation Quality</FormLabel>
+                <FormLabel className="flex items-center gap-1"><Star className="h-4 w-4"/>Califica la Calidad de la Donación</FormLabel>
                 <FormControl>
                     <RadioGroup
                     onValueChange={field.onChange}
@@ -117,21 +125,21 @@ const OrganizationRatingForm: FC<{ donation: Donation, onSubmit: (rating: number
                              </FormControl>
                               <FormLabel htmlFor={`rating-${value}`} className={`cursor-pointer flex flex-col items-center p-2 rounded-md transition-colors ${field.value === String(value) ? 'bg-primary text-primary-foreground scale-110' : 'hover:bg-muted'}`}>
                                 <Star className={`h-6 w-6 ${field.value === String(value) ? 'fill-current' : ''}`} />
-                                <span className="text-xs mt-1">{value}</span>
+                                <span className="text-xs mt-1">{ratingLabels[value]}</span> {/* Use label */}
                               </FormLabel>
                         </FormItem>
                     ))}
                     </RadioGroup>
                 </FormControl>
                  <FormDescription className="text-center">
-                    1 = Poor, 5 = Excellent
+                    1 = Malo, 5 = Excelente
                  </FormDescription>
                 <FormMessage />
                 </FormItem>
             )}
             />
              <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={form.formState.isSubmitting}>
-                 {form.formState.isSubmitting ? "Submitting..." : "Submit Rating"}
+                 {form.formState.isSubmitting ? "Enviando..." : "Enviar Calificación"}
             </Button>
         </form>
      </Form>
@@ -145,7 +153,7 @@ const TransactionValidation: FC<TransactionValidationProps> = ({ donation, role,
   const [isRated, setIsRated] = useState(!!donation.qualityRating);
 
   const handleValidationSubmit = async (code: string) => {
-      console.log(`Validating donation ${donation.id} with code: ${code}`);
+      console.log(`Validando donación ${donation.id} con código: ${code}`);
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       const success = code === 'VALID123'; // Mock validation logic
@@ -154,27 +162,27 @@ const TransactionValidation: FC<TransactionValidationProps> = ({ donation, role,
           setIsValidated(true);
           onValidationComplete?.(donation.id, code);
           toast({
-              title: "Delivery Validated!",
-              description: `Donation ${donation.itemName} marked as delivered.`,
+              title: "¡Entrega Validada!",
+              description: `Donación ${donation.itemName} marcada como entregada.`,
           });
       } else {
           toast({
-              title: "Validation Failed",
-              description: "The entered code is incorrect. Please try again.",
+              title: "Validación Fallida",
+              description: "El código ingresado es incorrecto. Por favor intenta de nuevo.",
               variant: "destructive",
           });
       }
   };
 
    const handleRatingSubmit = async (rating: number) => {
-      console.log(`Rating donation ${donation.id} with: ${rating} stars`);
+      console.log(`Calificando donación ${donation.id} con: ${rating} estrellas`);
       // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       setIsRated(true);
       onRatingComplete?.(donation.id, rating);
        toast({
-        title: "Rating Submitted!",
-        description: `Thank you for rating the quality of ${donation.itemName}.`,
+        title: "¡Calificación Enviada!",
+        description: `Gracias por calificar la calidad de ${donation.itemName}.`,
       });
   };
 
@@ -184,26 +192,26 @@ const TransactionValidation: FC<TransactionValidationProps> = ({ donation, role,
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-xl">
             <CheckCircle className="h-5 w-5 text-primary"/>
-            Transaction Details
+            Detalles de la Transacción
         </CardTitle>
         <CardDescription>
-          Validate delivery and rate the donation for: <span className="font-medium">{donation.itemName}</span>
+          Valida la entrega y califica la donación para: <span className="font-medium">{donation.itemName}</span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Business View: Validate Delivery */}
         {role === 'business' && (
           <div>
-            <h3 className="text-lg font-semibold mb-2">Validate Delivery</h3>
+            <h3 className="text-lg font-semibold mb-2">Validar Entrega</h3>
             {isValidated ? (
                <div className="flex items-center gap-2 text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 p-3 rounded-md">
                     <ThumbsUp className="h-5 w-5" />
-                    <span>Delivery already validated.</span>
+                    <span>Entrega ya validada.</span>
                 </div>
             ) : donation.status === 'claimed' ? (
               <BusinessValidationForm donation={donation} onSubmit={handleValidationSubmit} />
             ) : (
-                 <p className="text-sm text-muted-foreground italic">Waiting for the organization to pick up the donation.</p>
+                 <p className="text-sm text-muted-foreground italic">Esperando que la organización recoja la donación.</p>
             )}
           </div>
         )}
@@ -214,32 +222,34 @@ const TransactionValidation: FC<TransactionValidationProps> = ({ donation, role,
         {/* Organization View: Rate Donation */}
         {role === 'organization' && (
            <div>
-            <h3 className="text-lg font-semibold mb-2">Rate Donation Quality</h3>
+            <h3 className="text-lg font-semibold mb-2">Calificar Calidad de la Donación</h3>
             {isRated ? (
                 <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 p-3 rounded-md">
                     <Star className="h-5 w-5 fill-current" />
-                    <span>Thank you for your rating! ({donation.qualityRating || 'Rated'})</span>
+                    <span>¡Gracias por tu calificación! ({donation.qualityRating || 'Calificado'})</span>
                 </div>
             ) : isValidated || donation.status === 'delivered' ? ( // Only allow rating after delivery is confirmed/validated
                 <OrganizationRatingForm donation={donation} onSubmit={handleRatingSubmit} />
              ) : (
-                 <p className="text-sm text-muted-foreground italic">Please confirm pickup or wait for delivery validation before rating.</p>
+                 <p className="text-sm text-muted-foreground italic">Por favor confirma la recogida o espera la validación de entrega antes de calificar.</p>
              )}
            </div>
         )}
 
         {/* Show a message if the role doesn't match expected actions */}
          {role !== 'business' && role !== 'organization' && (
-             <p className="text-sm text-muted-foreground italic">No actions available for this role.</p>
+             <p className="text-sm text-muted-foreground italic">No hay acciones disponibles para este rol.</p>
          )}
 
       </CardContent>
       {/* Optional Footer */}
       {/* <CardFooter>
-        <p className="text-xs text-muted-foreground text-center w-full">Transaction ID: {donation.id}</p>
+        <p className="text-xs text-muted-foreground text-center w-full">ID de Transacción: {donation.id}</p>
       </CardFooter> */}
     </Card>
   );
 };
 
 export default TransactionValidation;
+
+    

@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CalendarIcon, Image as ImageIcon, MapPin, Package, PlusCircle } from "lucide-react";
 import { format } from "date-fns";
+import { es } from 'date-fns/locale'; // Import Spanish locale
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,15 +32,15 @@ import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   itemName: z.string().min(2, {
-    message: "Item name must be at least 2 characters.",
+    message: "El nombre del artículo debe tener al menos 2 caracteres.", // Translated message
   }),
   description: z.string().optional(),
-  quantity: z.string().min(1, { message: "Quantity is required." }),
+  quantity: z.string().min(1, { message: "La cantidad es requerida." }), // Translated message
   expirationDate: z.date({
-    required_error: "Expiration date is required.",
+    required_error: "La fecha de expiración es requerida.", // Translated message
   }),
   pickupLocation: z.string().min(5, {
-    message: "Pickup location must be at least 5 characters.",
+    message: "La ubicación de recogida debe tener al menos 5 caracteres.", // Translated message
   }),
   // Simple file input for now, real implementation would need more handling
   photo: z.any().optional(),
@@ -64,13 +65,13 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
 
   async function onSubmit(values: FormData) {
     // Simulate API call / Server Action
-    console.log("Submitting donation:", values);
+    console.log("Enviando donación:", values); // Translated log
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate delay
 
     // Display success toast
      toast({
-      title: "Donation Posted!",
-      description: `Your donation of ${values.itemName} has been listed.`,
+      title: "¡Donación Publicada!", // Translated
+      description: `Tu donación de ${values.itemName} ha sido listada.`, // Translated
     });
 
     // Reset form after successful submission
@@ -82,7 +83,7 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-2xl">
           <PlusCircle className="h-6 w-6 text-primary" />
-          Post a New Food Donation
+          Publicar Nueva Donación de Alimentos {/* Translated */}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -93,12 +94,12 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
               name="itemName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-1"><Package className="h-4 w-4"/>Item Name</FormLabel>
+                  <FormLabel className="flex items-center gap-1"><Package className="h-4 w-4"/>Nombre del Artículo</FormLabel> {/* Translated */}
                   <FormControl>
-                    <Input placeholder="e.g., Bread Loaves, Fresh Apples" {...field} />
+                    <Input placeholder="Ej., Panes, Manzanas Frescas" {...field} /> {/* Translated */}
                   </FormControl>
                   <FormDescription>
-                    The name of the food item being donated.
+                    El nombre del alimento que se dona. {/* Translated */}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -110,10 +111,10 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description (Optional)</FormLabel>
+                  <FormLabel>Descripción (Opcional)</FormLabel> {/* Translated */}
                   <FormControl>
                     <Textarea
-                      placeholder="Provide any additional details (e.g., brand, specific type)"
+                      placeholder="Proporciona detalles adicionales (ej., marca, tipo específico)" // Translated
                       className="resize-none"
                       {...field}
                     />
@@ -128,12 +129,12 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
               name="quantity"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Quantity</FormLabel>
+                  <FormLabel>Cantidad</FormLabel> {/* Translated */}
                   <FormControl>
-                    <Input placeholder="e.g., 10 loaves, 5 kg, 2 boxes" {...field} />
+                    <Input placeholder="Ej., 10 panes, 5 kg, 2 cajas" {...field} /> {/* Translated */}
                   </FormControl>
                    <FormDescription>
-                    Specify the amount available.
+                    Especifica la cantidad disponible. {/* Translated */}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -145,7 +146,7 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
               name="expirationDate"
               render={({ field }) => (
                 <FormItem className="flex flex-col">
-                  <FormLabel className="flex items-center gap-1"><CalendarIcon className="h-4 w-4"/>Expiration Date</FormLabel>
+                  <FormLabel className="flex items-center gap-1"><CalendarIcon className="h-4 w-4"/>Fecha de Expiración</FormLabel> {/* Translated */}
                   <Popover>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -157,9 +158,9 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
                           )}
                         >
                           {field.value ? (
-                            format(field.value, "PPP")
+                            format(field.value, "PPP", { locale: es }) // Use Spanish locale
                           ) : (
-                            <span>Pick a date</span>
+                            <span>Elige una fecha</span> // Translated
                           )}
                           <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                         </Button>
@@ -167,6 +168,7 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
                       <Calendar
+                        locale={es} // Set locale for Calendar
                         mode="single"
                         selected={field.value}
                         onSelect={field.onChange}
@@ -178,7 +180,7 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
                     </PopoverContent>
                   </Popover>
                   <FormDescription>
-                    The 'best before' or expiration date of the item.
+                    La fecha de 'consumo preferente' o expiración del artículo. {/* Translated */}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -190,12 +192,12 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
               name="pickupLocation"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-1"><MapPin className="h-4 w-4"/>Pickup Location</FormLabel>
+                  <FormLabel className="flex items-center gap-1"><MapPin className="h-4 w-4"/>Ubicación de Recogida</FormLabel> {/* Translated */}
                   <FormControl>
-                    <Input placeholder="Enter your business address" {...field} />
+                    <Input placeholder="Ingresa la dirección de tu negocio" {...field} /> {/* Translated */}
                   </FormControl>
                    <FormDescription>
-                    Where the donation can be collected from.
+                    Dónde se puede recoger la donación. {/* Translated */}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -207,13 +209,13 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
               name="photo"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="flex items-center gap-1"><ImageIcon className="h-4 w-4"/>Upload Photo (Optional)</FormLabel>
+                  <FormLabel className="flex items-center gap-1"><ImageIcon className="h-4 w-4"/>Subir Foto (Opcional)</FormLabel> {/* Translated */}
                   <FormControl>
                      {/* Basic file input - needs improvement for previews, etc. */}
                     <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files ? e.target.files[0] : null)} />
                   </FormControl>
                   <FormDescription>
-                    A photo helps organizations see the item.
+                    Una foto ayuda a las organizaciones a ver el artículo. {/* Translated */}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -221,7 +223,7 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
             />
 
             <Button type="submit" className="w-full bg-accent text-accent-foreground hover:bg-accent/90" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Posting..." : "Post Donation"}
+              {form.formState.isSubmitting ? "Publicando..." : "Publicar Donación"} {/* Translated */}
             </Button>
           </form>
         </Form>

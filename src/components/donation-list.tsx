@@ -10,19 +10,19 @@ import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from 'lucide-react';
 
-// --- Mock Data ---
+// --- Mock Data (Translated) ---
 const generateMockDonations = (count: number): Donation[] => {
-  const items = ['Bread Loaves', 'Fresh Apples', 'Canned Soup', 'Milk Cartons', 'Pasta Boxes', 'Yogurt Cups'];
-  const quantities = ['10 loaves', '5 kg', '2 cases', '20 cartons', '15 boxes', '50 cups'];
-  const locations = ['Downtown Bakery', 'Northside Grocer', 'Central Warehouse', 'East End Cafe', 'West Market', 'South Superette'];
+  const items = ['Panes', 'Manzanas Frescas', 'Sopa Enlatada', 'Cartones de Leche', 'Cajas de Pasta', 'Vasos de Yogur'];
+  const quantities = ['10 panes', '5 kg', '2 cajas', '20 cartones', '15 cajas', '50 vasos'];
+  const locations = ['Panadería del Centro', 'Tienda del Norte', 'Almacén Central', 'Café del Este', 'Mercado del Oeste', 'Supermercado del Sur'];
   const statuses: Donation['status'][] = ['available', 'available', 'available', 'claimed', 'delivered', 'expired'];
   const descriptions = [
-    'Slightly past best-by but still good.',
-    'Organic Gala apples.',
-    'Tomato soup, minor dent on some cans.',
-    'Whole milk, nearing expiration.',
-    'Gluten-free penne.',
-    'Strawberry flavor, good for 2 more days.',
+    'Un poco pasada la fecha de consumo preferente pero aún bueno.',
+    'Manzanas Gala orgánicas.',
+    'Sopa de tomate, abolladuras menores en algunas latas.',
+    'Leche entera, cerca de expirar.',
+    'Penne sin gluten.',
+    'Sabor fresa, bueno por 2 días más.',
   ];
    const photoHints = ['bread bakery', 'apples fruit', 'soup cans', 'milk carton', 'pasta box', 'yogurt cups']; // AI Hints for picsum
 
@@ -43,7 +43,7 @@ const generateMockDonations = (count: number): Donation[] => {
       expirationDate: baseDate.toISOString(),
       pickupLocation: locations[i % locations.length],
       photoUrl: `https://picsum.photos/seed/${i + 100}/400/300`, // Use seeded picsum for consistency
-      postedBy: `Business ${String.fromCharCode(65 + (i % 5))}`, // Business A, B, C...
+      postedBy: `Empresa ${String.fromCharCode(65 + (i % 5))}`, // Empresa A, B, C...
       status: status,
       claimedBy: status === 'claimed' || status === 'delivered' ? `Org ${i % 3 + 1}` : undefined,
       postedAt: postedDate.toISOString(),
@@ -71,7 +71,7 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role }) =
   useEffect(() => {
     setIsLoading(true);
     // In a real app, fetch from an API based on listType and role
-    console.log(`Fetching donations for type: ${listType}, role: ${role}`);
+    console.log(`Buscando donaciones por tipo: ${listType}, rol: ${role}`); // Translated log
     setTimeout(() => {
       const mockData = generateMockDonations(8); // Generate 8 mock donations
       // Filter based on type (simple example)
@@ -92,17 +92,17 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role }) =
   }, [listType, role]); // Refetch if listType or role changes
 
   const handleClaim = (donationId: string) => {
-    console.log(`Claiming donation ${donationId}`);
+    console.log(`Reclamando donación ${donationId}`); // Translated log
     // Simulate API call to claim
     // Update the local state optimistically or after API confirmation
     setDonations(prevDonations =>
       prevDonations.map(d =>
-        d.id === donationId ? { ...d, status: 'claimed', claimedBy: 'Your Organization' } : d // Example update
+        d.id === donationId ? { ...d, status: 'claimed', claimedBy: 'Tu Organización' } : d // Example update, translated
       )
     );
      toast({
-      title: "Donation Claimed!",
-      description: `You have successfully claimed donation ID: ${donationId}.`,
+      title: "¡Donación Reclamada!", // Translated
+      description: `Has reclamado exitosamente la donación ID: ${donationId}.`, // Translated
     });
     // In a real app, you'd likely refetch or get updated data from the backend
   };
@@ -137,9 +137,9 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role }) =
         <div className="flex justify-center items-center min-h-[40vh] p-4 md:p-6">
              <Alert className="max-w-md text-center bg-secondary">
                 <Info className="h-5 w-5" />
-                <AlertTitle>No Donations Found</AlertTitle>
+                <AlertTitle>No se encontraron Donaciones</AlertTitle> {/* Translated */}
                 <AlertDescription>
-                    There are currently no donations matching your criteria. Check back later!
+                    Actualmente no hay donaciones que coincidan con tus criterios. ¡Vuelve más tarde! {/* Translated */}
                  </AlertDescription>
             </Alert>
         </div>

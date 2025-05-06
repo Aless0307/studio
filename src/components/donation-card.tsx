@@ -1,12 +1,15 @@
 import type { FC } from 'react';
 import Image from 'next/image';
-import { format, parseISO } from 'date-fns';
-import { Calendar, MapPin, Package, Info, Recycle, CheckCircle, AlertTriangle } from 'lucide-react';
+import { format, parseISO, formatDistanceToNowStrict } from 'date-fns';
+import { es } from 'date-fns/locale'; // Import Spanish locale
+import { Calendar, MapPin, Package, Info, Recycle, CheckCircle, AlertTriangle, Clock } from 'lucide-react';
 
 import type { Donation } from '@/types/donation';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+
 
 interface DonationCardProps {
   donation: Donation;
@@ -15,16 +18,28 @@ interface DonationCardProps {
 }
 
 const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = true }) => {
+
   const formatDate = (date: Date | string | undefined): string => {
     if (!date) return 'N/A';
     try {
       const dateObj = typeof date === 'string' ? parseISO(date) : date;
-      return format(dateObj, 'MMM dd, yyyy');
+      return format(dateObj, 'dd MMM, yyyy', { locale: es }); // Use Spanish locale
     } catch (error) {
-      console.error("Error formatting date:", error);
-      return 'Invalid Date';
+      console.error("Error al formatear fecha:", error); // Translated error
+      return 'Fecha inválida'; // Translated
     }
   };
+
+   const formatRelativeDate = (date: Date | string | undefined): string => {
+    if (!date) return 'hace un tiempo'; // Translated fallback
+    try {
+      const dateObj = typeof date === 'string' ? parseISO(date) : date;
+      return formatDistanceToNowStrict(dateObj, { addSuffix: true, locale: es }); // Use Spanish locale
+    } catch (error) {
+      console.error("Error al formatear fecha relativa:", error); // Translated error
+      return 'Fecha inválida'; // Translated
+    }
+   }; // Added missing closing brace
 
   const getStatusBadgeVariant = (status: Donation['status']): "default" | "secondary" | "destructive" | "outline" => {
     switch (status) {
@@ -54,7 +69,17 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
       default:
         return null;
     }
-   }
+   };
+
+   const getStatusText = (status: Donation['status']): string => {
+     switch (status) {
+        case 'available': return 'Disponible';
+        case 'claimed': return 'Reclamado';
+        case 'delivered': return 'Entregado';
+        case 'expired': return 'Expirado';
+        default: return status;
+     }
+   };
 
   return (
     <Card className="w-full overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-200 flex flex-col">
@@ -65,7 +90,7 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
            </CardTitle>
            <Badge variant={getStatusBadgeVariant(donation.status)} className="capitalize whitespace-nowrap flex items-center">
              {getStatusIcon(donation.status)}
-             {donation.status}
+             {getStatusText(donation.status)} {/* Translated status */}
            </Badge>
         </div>
         {donation.description && (
@@ -78,8 +103,9 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
              <Image
                src={donation.photoUrl}
                alt={donation.itemName}
-               layout="fill"
-               objectFit="cover"
+               fill={true} // Use fill instead of layout
+               style={{ objectFit: 'cover' }} // Use style for objectFit with fill
+               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw" // Add sizes prop for optimization
                data-ai-hint="food donation"
              />
            </div>
@@ -91,34 +117,53 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
          )}
         <div className="flex items-center gap-2">
           <Info className="h-4 w-4 text-muted-foreground" />
-          <span>Quantity: {donation.quantity}</span>
+          <span>Cantidad: {donation.quantity}</span> {/* Translated */}
         </div>
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-muted-foreground" />
-          <span>Expires: {formatDate(donation.expirationDate)}</span>
-        </div>
+         <TooltipProvider>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <div className="flex items-center gap-2 cursor-default">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>Expira: {formatDate(donation.expirationDate)}</span> {/* Translated */}
+                    </div>
+                 </TooltipTrigger>
+                 <TooltipContent>
+                    <p>{formatRelativeDate(donation.expirationDate)}</p>
+                 </TooltipContent>
+            </Tooltip>
+         </TooltipProvider>
         <div className="flex items-center gap-2">
           <MapPin className="h-4 w-4 text-muted-foreground" />
-          <span>Pickup: {donation.pickupLocation}</span>
+          <span>Recogida: {donation.pickupLocation}</span> {/* Translated */}
         </div>
-         <div className="text-xs text-muted-foreground pt-1">
-            Posted on: {formatDate(donation.postedAt)} by {donation.postedBy}
-        </div>
+          <TooltipProvider>
+             <Tooltip>
+                <TooltipTrigger asChild>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground pt-1 cursor-default">
+                       <Clock className="h-3 w-3"/>
+                       <span>Publicado {formatRelativeDate(donation.postedAt)} por {donation.postedBy}</span> {/* Translated */}
+                    </div>
+                 </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{formatDate(donation.postedAt)}</p>
+                  </TooltipContent>
+             </Tooltip>
+          </TooltipProvider>
       </CardContent>
       <CardFooter>
         {isClaimable && donation.status === 'available' && (
           <Button onClick={() => onClaim(donation.id)} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
-            Claim Donation
+            Reclamar Donación {/* Translated */}
           </Button>
         )}
          {donation.status === 'claimed' && (
-            <p className="text-sm text-center w-full text-muted-foreground">Claimed by {donation.claimedBy || 'an organization'}</p>
+            <p className="text-sm text-center w-full text-muted-foreground">Reclamado por {donation.claimedBy || 'una organización'}</p> /* Translated */
          )}
           {donation.status === 'delivered' && (
-            <p className="text-sm text-center w-full text-green-700 dark:text-green-400">Successfully Delivered</p>
+            <p className="text-sm text-center w-full text-green-700 dark:text-green-400">Entregado Correctamente</p> /* Translated */
           )}
            {donation.status === 'expired' && (
-            <p className="text-sm text-center w-full text-destructive">This donation has expired.</p>
+            <p className="text-sm text-center w-full text-destructive">Esta donación ha expirado.</p> /* Translated */
            )}
       </CardFooter>
     </Card>

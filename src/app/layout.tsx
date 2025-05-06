@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Food Link', // Updated title
-  description: 'Connecting food surplus with those in need.', // Updated description
+  title: 'Food Link', // Keep brand name
+  description: 'Conectando excedentes de alimentos con quienes los necesitan.', // Updated description to Spanish
 };
 
 export default function RootLayout({
@@ -24,7 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es"> {/* Set lang to Spanish */}
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
         <Toaster /> {/* Add Toaster */}
