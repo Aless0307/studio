@@ -1,11 +1,11 @@
-
 import type { FC } from 'react';
 import Header from '@/components/header';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ArrowLeft, Building, Heart, Mail, Target, Users, Zap } from 'lucide-react';
+import { ArrowLeft, Building, Heart, Mail, Target, Users, Zap, Code, GraduationCap, User } from 'lucide-react';
+import Image from 'next/image';
 
 const AboutPage: FC = () => {
   return (
@@ -78,6 +78,55 @@ const AboutPage: FC = () => {
               <p>
                 Fomentamos tanto las donaciones gratuitas como las ofertas con precios simbólicos para cubrir costos operativos mínimos, permitiendo a las empresas recuperar parte de su inversión mientras apoyan una causa noble.
               </p>
+            </CardContent>
+          </Card>
+
+          {/* Creador del Proyecto - NUEVA SECCIÓN */}
+          <Card className="lg:col-span-3 shadow-lg overflow-hidden border-primary/20 bg-gradient-to-br from-primary/5 via-background to-secondary/10 dark:from-primary/10 dark:via-background/80 dark:to-secondary/20">
+            <CardHeader className="pb-2 border-b border-primary/10">
+              <CardTitle className="text-2xl font-bold flex items-center gap-2 text-primary">
+                <Code className="h-6 w-6"/> Creador del Proyecto
+              </CardTitle>
+              <CardDescription className="text-muted-foreground/80 italic">
+                "Tecnología con propósito social"
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="flex flex-col lg:flex-row gap-6 items-center lg:items-start">
+                <div className="w-40 h-40 rounded-full overflow-hidden relative bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center shadow-lg border-2 border-primary/20">
+                  <User className="h-24 w-24 text-primary/40" aria-hidden="true" />
+                </div>
+                <div className="flex-1 space-y-4">
+                  <div className="space-y-1 text-center lg:text-left">
+                    <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Alessandro Atilano Hernandez</h3>
+                    <p className="text-lg font-medium flex items-center justify-center lg:justify-start gap-1.5">
+                      <GraduationCap className="h-5 w-5 text-accent" />
+                      Estudiante de Ingeniería Informática
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
+                    <div className="bg-card rounded-lg p-3 shadow-sm border border-border/50">
+                      <p className="text-sm font-medium text-muted-foreground">Universidad</p>
+                      <p className="font-medium">Universidad Veracruzana</p>
+                      <p className="text-sm text-muted-foreground">Veracruz, Veracruz</p>
+                    </div>
+                    <div className="bg-card rounded-lg p-3 shadow-sm border border-border/50">
+                      <p className="text-sm font-medium text-muted-foreground">Información personal</p>
+                      <p className="font-medium">21 años</p>
+                      <p className="text-sm font-mono text-accent">Matrícula: S21002441</p>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-secondary/20 dark:bg-secondary/10 rounded-lg p-4 border border-border/50">
+                    <p className="italic text-muted-foreground">
+                      "Food Link representa mi visión de cómo la tecnología puede conectar necesidades sociales con recursos disponibles, 
+                      creando un impacto positivo en nuestra comunidad mientras combatimos el desperdicio alimentario."
+                    </p>
+                    <p className="text-right mt-2 font-medium">- Alessandro Atilano</p>
+                  </div>
+                </div>
+              </div>
             </CardContent>
           </Card>
 
