@@ -108,9 +108,9 @@ const FormControl = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof React.Fragment>
 >(({ className, children, ...props }, ref) => {
   return (
-    
+    <div className="w-full" >
       {children}
-    
+    </div>
   )
 })
 FormControl.displayName = "FormControl"
@@ -122,9 +122,12 @@ const FormDescription = React.forwardRef<
   const { formDescriptionId } = useFormField()
 
   return (
-    
+    <p
+      ref={ref}
+      id={formDescriptionId}
+      className={cn("text-sm text-muted-foreground", className)}
       {...props}
-    
+    />
   )
 })
 FormDescription.displayName = "FormDescription"
@@ -141,9 +144,14 @@ const FormMessage = React.forwardRef<
   }
 
   return (
-    
+    <p
+      ref={ref}
+      id={formMessageId}
+      className={cn("text-sm font-medium text-destructive", className)}
+      {...props}
+    >
       {body}
-    
+    </p>
   )
 })
 FormMessage.displayName = "FormMessage"
