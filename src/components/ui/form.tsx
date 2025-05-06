@@ -107,16 +107,13 @@ const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
   React.ComponentPropsWithoutRef<typeof Slot>
 >(({ className, children, ...props }, ref) => {
-  const { error, formItemId, formDescriptionId, formMessageId } = useFormField()
-
   return (
     <Slot
       ref={ref}
       className={className}
       {...props}
     >
-      {/* Wrap children in a React.Fragment to support multiple children */}
-      <React.Fragment key={"form-control-fragment"}>{children}</React.Fragment>
+      {children}
     </Slot>
   )
 })
@@ -173,5 +170,3 @@ export {
   FormMessage,
   FormField,
 }
-
-
