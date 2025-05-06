@@ -1,4 +1,3 @@
-
 import type { FC } from 'react';
 import Image from 'next/image';
 import { useState } from 'react'; // Import useState
@@ -160,10 +159,11 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
                src={donation.photoUrl}
                alt={`Foto de ${donation.itemName}`}
                fill={true}
-               style={{ objectFit: 'cover' }}
+               style={{ objectFit: 'contain', padding: '4px' }}
                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                data-ai-hint={donation['data-ai-hint'] || 'food donation'}
                priority={false}
+               className="rounded-md"
              />
            </div>
          ) : (

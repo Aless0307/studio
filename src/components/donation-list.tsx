@@ -1,4 +1,3 @@
-
 "use client";
 
 import type { FC } from 'react';
@@ -6,7 +5,7 @@ import { useState, useEffect } from 'react';
 import type { Donation, Message } from '@/types/donation';
 import DonationCard from './donation-card';
 import { Skeleton } from './ui/skeleton';
-import { Card as SkeletonCard, CardContent as SkeletonCardContent, CardFooter as SkeletonCardFooter, CardHeader as SkeletonCardHeader } from "@/components/ui/card"; // Use aliases for skeleton card
+import { Card as SkeletonCard, CardContent as SkeletonCardContent, CardHeader as SkeletonCardHeader, CardFooter as SkeletonCardFooter } from "@/components/ui/card"; // Corregido para incluir CardFooter
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Info } from 'lucide-react';
@@ -57,23 +56,103 @@ const generateMockMessages = (donationId: string, status: Donation['status']): M
   return messages;
 };
 
+// Función para asignar imágenes locales según el nombre del producto
+const getLocalImageForItem = (itemName: string, status: Donation['status']): string => {
+  const itemNameLower = itemName.toLowerCase();
+  
+  // Para donaciones reclamadas, usar sus imágenes específicas
+  if (status === 'claimed') {
+    if (itemNameLower.includes('pan')) {
+      return '/images/pandulce.png';
+    } else if (itemNameLower.includes('lentejas')) {
+      return '/images/lentejas.jpg';
+    } else if (itemNameLower.includes('yogur') || itemNameLower.includes('yogurt')) {
+      return '/images/yogurtgriego.png';
+    }
+  } 
+  // Para donaciones completadas (entregadas), usar imágenes específicas
+  else if (status === 'delivered') {
+    if (itemNameLower.includes('pan')) {
+      return '/images/pandulce.png';
+    } else if (itemNameLower.includes('arroz') && itemNameLower.includes('blanco')) {
+      return '/images/arrocito.jpg';
+    } else if (itemNameLower.includes('arroz')) {
+      return '/images/arroz.avif';
+    } else if (itemNameLower.includes('lentejas')) {
+      return '/images/lentejas.jpg';
+    } else if (itemNameLower.includes('yogur') || itemNameLower.includes('yogurt')) {
+      return '/images/yogurtgriego.png';
+    }
+  }
+  // Para donaciones expiradas
+  else if (status === 'expired') {
+    if (itemNameLower.includes('café') || itemNameLower.includes('cafe')) {
+      return '/images/cafe.jpeg';
+    } else if (itemNameLower.includes('donas')) {
+      return '/images/donas.jpg';
+    } else if (itemNameLower.includes('gelatina')) {
+      return '/images/gelatina.jpg';
+    }
+  }
+  // Para donaciones disponibles
+  else {
+    if (itemNameLower.includes('pan') || itemNameLower.includes('croissant') || itemNameLower.includes('bollería')) {
+      return '/images/pan.jpg';
+    } else if (itemNameLower.includes('manzanas')) {
+      return '/images/manzanukis.jpg';
+    } else if (itemNameLower.includes('leche')) {
+      return '/images/leche.png';
+    } else if (itemNameLower.includes('gelatina')) {
+      return '/images/gelatina.jpg';
+    } else if (itemNameLower.includes('donas')) {
+      return '/images/donas.jpg';
+    } else if (itemNameLower.includes('café') || itemNameLower.includes('cafe')) {
+      return '/images/cafe.jpeg';
+    } else if (itemNameLower.includes('pasta')) {
+      return '/images/pastaintegral.jpg';
+    } else if (itemNameLower.includes('plátanos')) {
+      return '/images/platanosmaduros.jpg';
+    } else if (itemNameLower.includes('yogur')) {
+      return '/images/yogurtgriego.png';
+    }
+  }
+  
+  // Si no hay coincidencia específica, devolver una imagen predeterminada según el estado
+  if (status === 'claimed' || status === 'delivered') {
+    return '/images/pandulce.png';
+  } else if (status === 'expired') {
+    return '/images/cafe.jpeg';
+  } else {
+    return '/images/pan.jpg';
+  }
+};
+
 const generateMockDonations = (count: number): Donation[] => {
-  const items = ['Panes variados', 'Manzanas Fuji Frescas', 'Sopa de Lentejas Enlatada', 'Cartones de Leche Semidesnatada', 'Cajas de Pasta Integral', 'Vasos de Yogur Griego Natural', 'Croissants y Bollería', 'Plátanos Maduros'];
-  const units = ['bolsas', 'kg', 'latas', 'litros', 'cajas', 'unidades', 'unidades', 'kg']; // Match units to items
-  const quantities = [10, 5, 24, 20, 15, 50, 30, 8]; // Numeric quantities
-  const locations = ['Panadería El Sol', 'Frutería La Huerta', 'Almacén Central FoodLink', 'Cafetería El Rincón', 'Mercado Municipal Puesto 5', 'Supermercado La Despensa', 'Panadería Delicias', 'Frutería Vitalidad'];
-  const statuses: Donation['status'][] = ['available', 'available', 'claimed', 'available', 'delivered', 'expired', 'claimed', 'delivered'];
+  const items = [
+    'Panes variados', 
+    'Manzanas Fuji Frescas', 
+    'Lentejas Ecológicas', // Cambiado de "Plátanos Maduros Orgánicos" a "Lentejas Ecológicas"
+    'Cartones de Leche Semidesnatada', 
+    'Arroz Integral Ecológico',
+    'Vasos de Gelatina Surtida',
+    'Pan Dulce Tradicional',
+    'Yogurt Griego Natural'
+  ];
+  const units = ['bolsas', 'kg', 'kg', 'litros', 'kg', 'unidades', 'piezas', 'unidades'];
+  const quantities = [10, 5, 8, 20, 15, 50, 30, 12];
+  const locations = ['Panadería El Sol', 'Frutería La Huerta', 'Mercado Orgánico', 'Cafetería El Rincón', 'Mercado Municipal Puesto 5', 'Supermercado La Despensa', 'Panadería Delicias', 'Tienda Natural'];
+  const statuses: Donation['status'][] = ['available', 'available', 'claimed', 'available', 'delivered', 'expired', 'claimed', 'claimed']; // 3 reclamadas
   const descriptions = [
     'Pan del día anterior, ideal para tostadas o migas.',
     'Manzanas Fuji orgánicas, algunas con pequeñas marcas.',
-    'Sopa de lentejas casera, lista para calentar.',
+    'Lentejas ecológicas de primera calidad, sin conservantes.', // Nueva descripción para lentejas
     'Leche UHT semidesnatada, caducidad próxima (5 días).',
-    'Penne integral de trigo duro.',
-    'Yogur griego natural sin azúcar, bueno por 3 días más.',
-    'Excedente de croissants y napolitanas del día.',
-    'Caja de plátanos maduros, ideales para batidos o repostería.',
+    'Arroz integral de cultivo ecológico, en perfectas condiciones.',
+    'Gelatina de varios sabores, elaboración reciente.',
+    'Pan dulce tradicional: conchas, orejas y bigotes recién horneados.',
+    'Yogurt griego natural sin azúcares añadidos, alto en proteínas.'
   ];
-   const photoHints = ['assorted bread', 'fuji apples', 'lentil soup', 'milk cartons', 'pasta boxes', 'yogurt cups', 'pastries assortment', 'ripe bananas']; // Specific, relevant hints
+  const photoHints = ['assorted bread', 'fuji apples', 'lentil soup', 'milk cartons', 'rice bags', 'jello cups', 'donuts assortment', 'coffee beans']; // Updated hints
    const pickupInstructions = [
      'Preguntar por Ana en recepción. L-V 9am-5pm.',
      'Recoger en muelle de carga trasero. Tocar timbre.',
@@ -89,57 +168,150 @@ const generateMockDonations = (count: number): Donation[] => {
 
 
   return Array.from({ length: count }, (_, i) => {
-    const index = i % items.length; // Use modulo for cycling through data
-    const status = statuses[index];
+    // En lugar de usar módulo para el índice, asignamos valores específicos
+    // para cada donación en las posiciones 0-11
+    let itemName = '';
+    let description = '';
+    let status: Donation['status'] = 'available';
+    let unit = 'unidades';
+    let quantity = 10;
+    
+    // Definimos 5 donaciones disponibles con sus descripciones específicas
+    if (i === 0) {
+      status = 'available';
+      itemName = 'Manzanas Fuji Frescas';
+      description = 'Manzanas Fuji orgánicas, algunas con pequeñas marcas.';
+      unit = 'kg';
+      quantity = 5;
+    }
+    else if (i === 1) {
+      status = 'available';
+      itemName = 'Cartones de Leche Semidesnatada';
+      description = 'Leche UHT semidesnatada, caducidad próxima (5 días).';
+      unit = 'litros';
+      quantity = 20;
+    }
+    else if (i === 2) {
+      status = 'available';
+      itemName = 'Vasos de Gelatina Surtida';
+      description = 'Gelatina de varios sabores, elaboración reciente.';
+      unit = 'unidades';
+      quantity = 50;
+    }
+    else if (i === 3) {
+      status = 'available';
+      itemName = 'Donas Glaseadas Variadas';
+      description = 'Donas con diversos toppings y rellenos, recién horneadas.';
+      unit = 'unidades';
+      quantity = 24;
+    }
+    else if (i === 4) {
+      status = 'available';
+      itemName = 'Café Premium Colombiano';
+      description = 'Café de origen colombiano, perfecto para baristas.';
+      unit = 'kg';
+      quantity = 3;
+    }
+    // 3 donaciones reclamadas: pan dulce, lentejas y yogurt
+    else if (i === 5) {
+      status = 'claimed';
+      itemName = 'Pan Dulce Tradicional';
+      description = 'Pan dulce tradicional: conchas, orejas y bigotes recién horneados.';
+      unit = 'piezas';
+      quantity = 30;
+    }
+    else if (i === 6) {
+      status = 'claimed';
+      itemName = 'Lentejas Ecológicas';
+      description = 'Lentejas ecológicas de primera calidad, sin conservantes.';
+      unit = 'kg';
+      quantity = 8;
+    }
+    else if (i === 7) {
+      status = 'claimed';
+      itemName = 'Yogurt Griego Natural';
+      description = 'Yogurt griego natural sin azúcares añadidos, alto en proteínas.';
+      unit = 'unidades';
+      quantity = 12;
+    }
+    // 3 donaciones entregadas (historial): pan, arroz integral y arroz blanco
+    else if (i === 8) {
+      status = 'delivered';
+      itemName = 'Panes variados';
+      description = 'Pan del día anterior, ideal para tostadas o migas.';
+      unit = 'bolsas';
+      quantity = 10;
+    }
+    else if (i === 9) {
+      status = 'delivered';
+      itemName = 'Arroz Integral Ecológico';
+      description = 'Arroz integral de cultivo ecológico, en perfectas condiciones.';
+      unit = 'kg';
+      quantity = 15;
+    }
+    else if (i === 10) {
+      status = 'delivered';
+      itemName = 'Arroz Blanco Premium';
+      description = 'Arroz blanco de grano largo, variedad jasmine importado.';
+      unit = 'kg';
+      quantity = 8;
+    }
+    // 1 donación expirada
+    else {
+      status = 'expired';
+      itemName = 'Vasos de Gelatina Surtida';
+      description = 'Gelatina de varios sabores, elaboración reciente.';
+      unit = 'unidades';
+      quantity = 15;
+    }
+    
     const baseDate = new Date();
-    const expirationOffset = status === 'expired' ? -2 : (index % 7) + 1;
+    const expirationOffset = status === 'expired' ? -2 : 5; // 5 días para caducidad
     const expirationDate = new Date(baseDate.getTime() + 86400000 * expirationOffset);
 
     const postedDate = new Date();
-    postedDate.setDate(postedDate.getDate() - (index % 5));
+    postedDate.setDate(postedDate.getDate() - (i % 5));
 
     let claimedDate: Date | undefined = undefined;
     let deliveredDate: Date | undefined = undefined;
 
     if (status === 'claimed' || status === 'delivered') {
-        claimedDate = new Date(postedDate.getTime() + 86400000 * (index % 2 + 1));
-        if (claimedDate > new Date()) claimedDate = new Date(postedDate.getTime() + 3600000);
-
+        claimedDate = new Date(postedDate.getTime() + 86400000);
+        
         if (status === 'delivered') {
-            deliveredDate = new Date(claimedDate.getTime() + 86400000 * (index % 3 + 1));
-            if (deliveredDate > new Date()) deliveredDate = new Date(claimedDate.getTime() + 7200000);
+            deliveredDate = new Date(claimedDate.getTime() + 86400000 * 2);
         }
     }
 
-
     const donationId = `donation-${i + 1}`;
-    const donationStatus = status;
-    const isFree = prices[index] === undefined; // Determine if free based on price presence
-    const currentPhotoHint = photoHints[index]; // Get hint for current item
-    const photoUrl = `https://picsum.photos/seed/${currentPhotoHint.replace(/ /g, '_')}/400/300`; // Generate URL based on hint
+    const isFree = i % 2 === 0; // Alternar entre gratis y no gratis
+    const pricePerUnit = isFree ? undefined : (5 + i % 10); // Precio aleatorio si no es gratis
+    
+    // Usar la función para asignar imágenes basado en el nombre del producto y su estado
+    const photoUrl = getLocalImageForItem(itemName, status);
 
     return {
       id: donationId,
-      itemName: items[index],
-      description: descriptions[index],
-      quantity: quantities[index], // Use numeric quantity
-      unit: units[index], // Use specific unit
-      pricePerUnit: prices[index], // Assign price in MXN$
+      itemName: itemName,
+      description: description,
+      quantity: quantity,
+      unit: unit,
+      pricePerUnit: pricePerUnit,
       expirationDate: expirationDate.toISOString(),
-      pickupLocation: locations[index],
-      pickupInstructions: pickupInstructions[index],
-      photoUrl: photoUrl, // Use the generated URL
-      postedBy: `Empresa ${String.fromCharCode(65 + (index % 5))}`,
-      status: donationStatus,
-      claimedBy: status === 'claimed' || status === 'delivered' ? `Org ${index % 3 + 1}` : undefined,
+      pickupLocation: locations[i % locations.length],
+      pickupInstructions: pickupInstructions[i % pickupInstructions.length],
+      photoUrl: photoUrl,
+      postedBy: `Empresa ${String.fromCharCode(65 + (i % 5))}`,
+      status: status,
+      claimedBy: status === 'claimed' || status === 'delivered' ? `Org ${i % 3 + 1}` : undefined,
       postedAt: postedDate.toISOString(),
       claimedAt: claimedDate?.toISOString(),
       deliveredAt: deliveredDate?.toISOString(),
-      isFree: isFree, // Set isFree based on price
-      messages: generateMockMessages(donationId, donationStatus),
-      'data-ai-hint': currentPhotoHint, // Use the specific hint
+      isFree: isFree,
+      messages: generateMockMessages(donationId, status),
+      'data-ai-hint': itemName.toLowerCase().replace(/ /g, '_'),
       validationCode: status === 'delivered' || status === 'claimed' ? `VAL${100 + i}`: undefined,
-      qualityRating: status === 'delivered' ? (index % 5) + 1 : undefined
+      qualityRating: status === 'delivered' ? (i % 5) + 1 : undefined
     };
   });
 };
