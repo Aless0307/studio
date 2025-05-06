@@ -4,7 +4,7 @@
 import type { FC } from 'react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { formatDistanceToNowStrict } from 'date-fns';
+import { format, parseISO, formatDistanceToNowStrict } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -51,11 +51,11 @@ const fetchMockMessageThreads = (role: 'business' | 'organization'): Donation[] 
        expirationDate: new Date(baseDate.getTime() + 86400000 * 5).toISOString(),
        pickupLocation: `Ubicación ${i+1}`,
        isFree: i % 3 !== 0, // Example price logic
-       pricePerUnit: i % 3 === 0 ? undefined : 0.5, // Example price
+       pricePerUnit: i % 3 === 0 ? undefined : 15.00, // Example price in MXN$
        postedAt: postedDate.toISOString(),
        claimedAt: claimedDate.toISOString(),
        deliveredAt: deliveredDate?.toISOString(),
-       'data-ai-hint': 'food item', // Generic hint for example
+       'data-ai-hint': i % 2 === 0 ? 'vegetables box' : 'canned goods', // More relevant hints
      };
    });
 

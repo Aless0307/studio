@@ -20,7 +20,7 @@ const mockDonationForValidation: Donation = {
   expirationDate: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(), // Expires in 3 days
   pickupLocation: 'Almacén Central FoodLink',
   pickupInstructions: 'Entrada por puerta lateral (indicada). Aparcamiento disponible. L-V 9am-5pm.',
-  photoUrl: `https://picsum.photos/seed/lentil_soup_cans/400/300`, // Hint based image
+  photoUrl: `https://picsum.photos/seed/lentil_soup/400/300`, // Specific hint
   postedBy: `Empresa C`,
   status: 'claimed' as const,
   claimedBy: `Tu Organización`,
@@ -35,7 +35,7 @@ const mockDonationForValidation: Donation = {
       { id: 'val-msg-2', sender: 'organization', text: '¡Reclamada! ¿Instrucciones para recoger?', timestamp: new Date(new Date().setDate(new Date().getDate() - 1)) },
       { id: 'val-msg-3', sender: 'business', text: 'Claro, usad la puerta lateral indicada. Podéis pasar de 9 a 5.', timestamp: new Date(new Date().setDate(new Date().getDate() - 1) + 3600000) },
   ],
-  'data-ai-hint': 'lentil soup cans' // Relevant hint already present
+  'data-ai-hint': 'lentil soup' // Specific hint
 };
 
 

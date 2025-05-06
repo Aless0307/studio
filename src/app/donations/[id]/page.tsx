@@ -22,7 +22,7 @@ const fetchMockDonationById = (id: string): Donation | null => {
           expirationDate: new Date(new Date().setDate(new Date().getDate() + 3)).toISOString(),
           pickupLocation: 'Almacén Central FoodLink',
           pickupInstructions: 'Entrada por puerta lateral (indicada). Aparcamiento disponible. L-V 9am-5pm.',
-          photoUrl: `https://picsum.photos/seed/lentil_soup_cans/400/300`, // Seeded with hint
+          photoUrl: `https://picsum.photos/seed/lentil_soup/400/300`, // Specific hint
           postedBy: `Empresa C`,
           status: 'claimed' as const,
           claimedBy: `Tu Organización`,
@@ -38,7 +38,7 @@ const fetchMockDonationById = (id: string): Donation | null => {
               { id: 'val-msg-2', sender: 'organization', text: '¡Reclamada! ¿Instrucciones para recoger?', timestamp: new Date(new Date().setDate(new Date().getDate() - 1)) },
               { id: 'val-msg-3', sender: 'business', text: 'Claro, usad la puerta lateral indicada. Podéis pasar de 9 a 5.', timestamp: new Date(new Date().setDate(new Date().getDate() - 1) + 3600000) },
           ],
-          'data-ai-hint': 'lentil soup cans'
+          'data-ai-hint': 'lentil soup' // Specific hint
       };
     }
     // Add more mock donations or logic here if needed
@@ -52,7 +52,7 @@ const fetchMockDonationById = (id: string): Donation | null => {
             expirationDate: new Date(new Date().setDate(new Date().getDate() + 4)).toISOString(),
             pickupLocation: 'Almacén Central FoodLink',
             pickupInstructions: 'Entrada por puerta lateral (indicada). Aparcamiento disponible.',
-            photoUrl: 'https://picsum.photos/seed/lentil_soup_cans/400/300', // Seeded with hint
+            photoUrl: 'https://picsum.photos/seed/lentil_soup/400/300', // Specific hint
             postedBy: 'Empresa C',
             status: 'claimed',
             claimedBy: 'Org 1',
@@ -65,9 +65,36 @@ const fetchMockDonationById = (id: string): Donation | null => {
                 { id: 'd3-msg-2', sender: 'organization', text: 'Hola Empresa C, hemos reclamado la sopa. ¿Podemos pasar el viernes por la mañana?', timestamp: new Date(new Date().setDate(new Date().getDate() - 1))},
                 { id: 'd3-msg-3', sender: 'business', text: '¡Perfecto! Viernes por la mañana está bien. Preguntad por Marta.', timestamp: new Date(new Date().setDate(new Date().getDate() - 1) + 1800000)},
             ],
-            'data-ai-hint': 'lentil soup cans'
+            'data-ai-hint': 'lentil soup' // Specific hint
             };
      }
+      // Example: Add a paid donation
+      if (id === 'donation-paid-1') {
+        return {
+            id: `donation-paid-1`,
+            itemName: 'Manzanas Fuji Frescas',
+            description: 'Manzanas Fuji orgánicas, algunas con pequeñas marcas.',
+            quantity: 5,
+            unit: 'kg',
+            expirationDate: new Date(new Date().setDate(new Date().getDate() + 5)).toISOString(),
+            pickupLocation: 'Frutería La Huerta',
+            pickupInstructions: 'Recoger en muelle de carga trasero. Tocar timbre.',
+            photoUrl: `https://picsum.photos/seed/fuji_apples/400/300`,
+            postedBy: `Empresa B`,
+            status: 'claimed',
+            claimedBy: `Org 2`,
+            postedAt: new Date(new Date().setDate(new Date().getDate() - 3)).toISOString(),
+            claimedAt: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(),
+            isFree: false,
+            pricePerUnit: 10.50, // Price in MXN$
+            messages: [
+                { id: 'paid-msg-1', sender: 'system', text: 'Oferta publicada.', timestamp: new Date(new Date().setDate(new Date().getDate() - 3)) },
+                { id: 'paid-msg-2', sender: 'organization', text: 'Reclamado. ¿Aceptan pago con tarjeta al recoger?', timestamp: new Date(new Date().setDate(new Date().getDate() - 1)) },
+                { id: 'paid-msg-3', sender: 'business', text: 'Sí, aceptamos tarjeta. ¡Nos vemos!', timestamp: new Date(new Date().setDate(new Date().getDate() - 1) + 1800000) },
+            ],
+            'data-ai-hint': 'fuji apples'
+        };
+      }
 
     return null; // Donation not found
 };
@@ -138,9 +165,8 @@ export default DonationPage;
 // export async function generateStaticParams() {
 //   // Fetch all donation IDs
 //   // const donations = await fetchAllDonationIds();
-//   const mockIds = ['donation-val-1', 'donation-3']; // Example IDs
+//   const mockIds = ['donation-val-1', 'donation-3', 'donation-paid-1']; // Example IDs including paid one
 //   return mockIds.map((id) => ({
 //     id: id,
 //   }));
 // }
-

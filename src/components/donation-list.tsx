@@ -73,7 +73,7 @@ const generateMockDonations = (count: number): Donation[] => {
     'Excedente de croissants y napolitanas del día.',
     'Caja de plátanos maduros, ideales para batidos o repostería.',
   ];
-   const photoHints = ['bread bakery assortment', 'apples fruit crate', 'lentil soup cans', 'milk cartons shelf', 'pasta box variety', 'yogurt cups plain', 'croissants pastry assortment', 'bananas ripe box']; // Updated hints
+   const photoHints = ['assorted bread', 'fuji apples', 'lentil soup', 'milk cartons', 'pasta boxes', 'yogurt cups', 'pastries assortment', 'ripe bananas']; // Specific, relevant hints
    const pickupInstructions = [
      'Preguntar por Ana en recepción. L-V 9am-5pm.',
      'Recoger en muelle de carga trasero. Tocar timbre.',
@@ -84,7 +84,8 @@ const generateMockDonations = (count: number): Donation[] => {
      'Preguntar por Luis en obrador. L-S 8am-2pm.',
      'Recoger antes de las 12pm. Muelle trasero.',
    ];
-   const prices = [undefined, 0.5, undefined, 0.2, undefined, 0.1, 0.25, 0.4]; // Example prices per unit
+   // Example prices in MXN$
+   const prices = [undefined, 10.50, undefined, 5.00, undefined, 3.50, 8.00, 12.00];
 
 
   return Array.from({ length: count }, (_, i) => {
@@ -121,11 +122,11 @@ const generateMockDonations = (count: number): Donation[] => {
       description: descriptions[index],
       quantity: quantities[index], // Use numeric quantity
       unit: units[index], // Use specific unit
-      pricePerUnit: prices[index], // Assign price
+      pricePerUnit: prices[index], // Assign price in MXN$
       expirationDate: expirationDate.toISOString(),
       pickupLocation: locations[index],
       pickupInstructions: pickupInstructions[index],
-      photoUrl: `https://picsum.photos/seed/${photoHints[index].replace(/ /g, '_')}/400/300`, // Use hint for more relevant image
+      photoUrl: `https://picsum.photos/seed/${photoHints[index].replace(/ /g, '_')}/400/300`, // Use specific hint for image
       postedBy: `Empresa ${String.fromCharCode(65 + (index % 5))}`,
       status: donationStatus,
       claimedBy: status === 'claimed' || status === 'delivered' ? `Org ${index % 3 + 1}` : undefined,
@@ -209,7 +210,7 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
                 // quantity: remainingQuantity > 0 ? remainingQuantity : 0, // Example: Update quantity
                 status: 'claimed' as const, // Mark as claimed regardless of partial/full for now
                 claimedBy: 'Tu Organización', // Assume current user
-                // claimedAt: new Date().toISOString() // Set claim time
+                claimedAt: new Date().toISOString() // Set claim time
             };
         }
         return d;
@@ -224,7 +225,7 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
     });
      toast({
       title: "¡Donación Reclamada!",
-      description: `Has reclamado ${quantityToClaim} unidades de la donación ID: ${donationId}. Revisa la pestaña 'Mis Reclamadas' para ver detalles y mensajes.`,
+      description: `Has reclamado ${quantityToClaim} unidades de ${donations.find(d => d.id === donationId)?.itemName || 'la donación'}. Revisa la pestaña 'Mis Reclamadas' para ver detalles y mensajes.`,
     });
   };
 
@@ -289,4 +290,3 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
 };
 
 export default DonationList;
-

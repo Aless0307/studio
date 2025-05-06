@@ -169,9 +169,9 @@ const DonationPostForm: FC<DonationPostFormProps> = ({}) => {
                 name="pricePerUnit"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="flex items-center gap-1.5 text-sm font-medium"><Tag className="h-4 w-4"/>Precio por Unidad (€) *</FormLabel>
+                    <FormLabel className="flex items-center gap-1.5 text-sm font-medium"><Tag className="h-4 w-4"/>Precio por Unidad (MXN$) *</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.01" placeholder="Ej., 0.50" {...field} />
+                      <Input type="number" step="0.01" placeholder="Ej., 10.50" {...field} />
                     </FormControl>
                     <FormDescription className="text-xs">
                        Indica el precio simbólico por cada unidad (kg, lata, etc.).

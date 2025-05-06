@@ -143,7 +143,7 @@ const DonationDetailView: FC<DonationDetailViewProps> = ({ donation, role }) => 
                         {donation.isFree ? (
                             <><BadgePercent className="mr-1 h-4 w-4" /> Gratis</>
                         ) : (
-                            <><HandCoins className="mr-1 h-4 w-4" /> {donation.pricePerUnit?.toFixed(2)} € / {donation.unit}</>
+                            <><HandCoins className="mr-1 h-4 w-4" /> MXN$ {donation.pricePerUnit?.toFixed(2)} / {donation.unit}</>
                         )}
                     </Badge>
                 </div>
@@ -251,7 +251,7 @@ const DonationDetailView: FC<DonationDetailViewProps> = ({ donation, role }) => 
                             }`}
                         >
                             {msg.sender !== 'system' && (
-                                <p className="text-xs font-medium mb-1 ${ msg.sender === role ? 'text-primary-foreground/80' : 'text-muted-foreground' }">
+                                <p className={`text-xs font-medium mb-1 ${ msg.sender === role ? 'text-primary-foreground/80' : 'text-muted-foreground' }`}>
                                      {getSenderName(msg.sender)}
                                  </p>
                              )}

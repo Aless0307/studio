@@ -97,7 +97,7 @@ const DonationCard: FC<DonationCardProps> = ({ donation, onClaim, isClaimable = 
              </>
         ) : (
             <>
-                 <HandCoins className="mr-1 h-3 w-3" /> {pricePerUnit?.toFixed(2)} € / {unit || 'unidad'}
+                 <HandCoins className="mr-1 h-3 w-3" /> MXN$ {pricePerUnit?.toFixed(2)} / {unit || 'unidad'}
              </>
         )}
      </Badge>
