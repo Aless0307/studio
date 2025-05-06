@@ -9,6 +9,8 @@ import MockMessagesView from "@/components/mock-messages-view"; // Import the ne
 import MockPickupProcess from "@/components/mock-pickup-process"; // Import the pickup process component
 import DonateToFoodlinkSection from "@/components/donate-to-foodlink-section"; // Import the new donation section
 import type { Donation } from "@/types/donation"; // Import Donation type
+import Link from "next/link"; // Import Link
+import { Separator } from "@/components/ui/separator"; // Import Separator
 
 // Mock donation for validation/rating example (adjust as needed based on DonationList updates)
 const mockDonationForValidation: Donation = {
@@ -156,7 +158,16 @@ export default function Home() {
         <DonateToFoodlinkSection />
       </div>
       <footer className="py-6 text-center text-sm text-muted-foreground border-t bg-card mt-auto">
-        © {new Date().getFullYear()} Food Link. Conectando excedentes con necesidad. Todos los derechos reservados.
+        <div className="flex justify-center items-center gap-4">
+             <span>© {new Date().getFullYear()} Food Link. Todos los derechos reservados.</span>
+             <Separator orientation="vertical" className="h-4" />
+             <Link href="/about" passHref>
+                <span className="hover:text-primary hover:underline cursor-pointer">
+                    Acerca de Nosotros
+                </span>
+            </Link>
+        </div>
+         <p className="mt-1 text-xs">Conectando excedentes con necesidad.</p>
       </footer>
     </div>
   );
