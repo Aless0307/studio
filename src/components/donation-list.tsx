@@ -58,7 +58,7 @@ const generateMockMessages = (donationId: string, status: Donation['status']): M
 };
 
 const generateMockDonations = (count: number): Donation[] => {
-  const items = ['Panes variados', 'Manzanas Frescas Fuji', 'Sopa de Lentejas Enlatada', 'Cartones de Leche Semidesnatada', 'Cajas de Pasta Integral', 'Vasos de Yogur Griego Natural', 'Croissants y Bollería', 'Plátanos Maduros'];
+  const items = ['Panes variados', 'Manzanas Fuji Frescas', 'Sopa de Lentejas Enlatada', 'Cartones de Leche Semidesnatada', 'Cajas de Pasta Integral', 'Vasos de Yogur Griego Natural', 'Croissants y Bollería', 'Plátanos Maduros'];
   const units = ['bolsas', 'kg', 'latas', 'litros', 'cajas', 'unidades', 'unidades', 'kg']; // Match units to items
   const quantities = [10, 5, 24, 20, 15, 50, 30, 8]; // Numeric quantities
   const locations = ['Panadería El Sol', 'Frutería La Huerta', 'Almacén Central FoodLink', 'Cafetería El Rincón', 'Mercado Municipal Puesto 5', 'Supermercado La Despensa', 'Panadería Delicias', 'Frutería Vitalidad'];
@@ -115,6 +115,8 @@ const generateMockDonations = (count: number): Donation[] => {
     const donationId = `donation-${i + 1}`;
     const donationStatus = status;
     const isFree = prices[index] === undefined; // Determine if free based on price presence
+    const currentPhotoHint = photoHints[index]; // Get hint for current item
+    const photoUrl = `https://picsum.photos/seed/${currentPhotoHint.replace(/ /g, '_')}/400/300`; // Generate URL based on hint
 
     return {
       id: donationId,
@@ -126,7 +128,7 @@ const generateMockDonations = (count: number): Donation[] => {
       expirationDate: expirationDate.toISOString(),
       pickupLocation: locations[index],
       pickupInstructions: pickupInstructions[index],
-      photoUrl: `https://picsum.photos/seed/${photoHints[index].replace(/ /g, '_')}/400/300`, // Use specific hint for image
+      photoUrl: photoUrl, // Use the generated URL
       postedBy: `Empresa ${String.fromCharCode(65 + (index % 5))}`,
       status: donationStatus,
       claimedBy: status === 'claimed' || status === 'delivered' ? `Org ${index % 3 + 1}` : undefined,
@@ -135,7 +137,7 @@ const generateMockDonations = (count: number): Donation[] => {
       deliveredAt: deliveredDate?.toISOString(),
       isFree: isFree, // Set isFree based on price
       messages: generateMockMessages(donationId, donationStatus),
-      'data-ai-hint': photoHints[index], // Use specific hint
+      'data-ai-hint': currentPhotoHint, // Use the specific hint
       validationCode: status === 'delivered' || status === 'claimed' ? `VAL${100 + i}`: undefined,
       qualityRating: status === 'delivered' ? (index % 5) + 1 : undefined
     };
@@ -158,95 +160,126 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
   useEffect(() => {
     setIsLoading(true);
     console.log(`Buscando donaciones por tipo: ${listType}, rol: ${role}`);
-    setTimeout(() => {
-      const mockData = generateMockDonations(12);
+    // Simulate data fetching delay
+    const timer = setTimeout(() => {
+      try {
+          const mockData = generateMockDonations(12); // Generate mock data
 
-      let filteredData = mockData;
-      // --- Filtering Logic (Keep as is, assuming filtering works with new data structure) ---
-       if (role === 'organization') {
-          if (listType === 'available') {
-              filteredData = mockData.filter(d => d.status === 'available');
-          } else if (listType === 'claimed') {
-              // Org's claimed but not yet delivered/validated
-              filteredData = mockData.filter(d => d.status === 'claimed' /* && d.claimedBy === currentUserOrgId */);
-          } else if (listType === 'history') {
-              // Org's completed (delivered/rated) or expired claims
-              filteredData = mockData.filter(d => (d.status === 'delivered' || d.status === 'expired') /* && d.claimedBy === currentUserOrgId */);
+          let filteredData = mockData;
+          // --- Filtering Logic ---
+           if (role === 'organization') {
+              if (listType === 'available') {
+                  filteredData = mockData.filter(d => d.status === 'available');
+              } else if (listType === 'claimed') {
+                  // Org's claimed but not yet delivered/validated (Assume 'Tu Organización' claims some)
+                  // For mock, let's show all claimed by any Org
+                  filteredData = mockData.filter(d => d.status === 'claimed' /* && d.claimedBy === 'Tu Organización' */);
+              } else if (listType === 'history') {
+                  // Org's completed (delivered/rated) or expired claims
+                   filteredData = mockData.filter(d => (d.status === 'delivered' || d.status === 'expired') /* && d.claimedBy === 'Tu Organización' */);
+              }
+              // 'all' for org might mean available + their claimed/history (not implemented here)
+          } else if (role === 'business') {
+               if (listType === 'available') { // Businesses might see available to monitor market? Or filter their own available.
+                  // Show only items posted by a hypothetical "current user business" - let's assume Empresa A
+                  filteredData = mockData.filter(d => d.status === 'available' /* && d.postedBy === 'Empresa A' */);
+              } else if (listType === 'claimed') {
+                  // Business's items claimed by others, pending validation
+                  filteredData = mockData.filter(d => d.status === 'claimed' /* && d.postedBy === 'Empresa A' */);
+              } else if (listType === 'history') {
+                  // Business's completed (delivered) or expired posts
+                  filteredData = mockData.filter(d => (d.status === 'delivered' || d.status === 'expired') /* && d.postedBy === 'Empresa A' */);
+              } else if (listType === 'all') {
+                 // All donations posted by this business
+                 filteredData = mockData; //.filter(d => d.postedBy === 'Empresa A');
+              }
           }
-          // 'all' for org might mean available + their claimed/history (not implemented here)
-      } else if (role === 'business') {
-           if (listType === 'available') { // Businesses might see available to monitor market? Or filter their own available.
-              filteredData = mockData.filter(d => d.status === 'available' /* && d.postedBy === currentUserBusinessId */);
-          } else if (listType === 'claimed') {
-              // Business's items claimed by others, pending validation
-              filteredData = mockData.filter(d => d.status === 'claimed' /* && d.postedBy === currentUserBusinessId */);
-          } else if (listType === 'history') {
-              // Business's completed (delivered) or expired posts
-              filteredData = mockData.filter(d => (d.status === 'delivered' || d.status === 'expired') /* && d.postedBy === currentUserBusinessId */);
-          } else if (listType === 'all') {
-             // All donations posted by this business
-             filteredData = mockData; //.filter(d => d.postedBy === currentUserBusinessId);
-          }
+          // --- End Filtering Logic ---
+
+          setDonations(filteredData);
+      } catch (error) {
+         console.error("Error generating or filtering mock data:", error);
+         setDonations([]); // Set empty on error
+      } finally {
+        setIsLoading(false);
       }
-      // --- End Filtering Logic ---
+    }, 1500); // Simulate 1.5 second load
 
+    // Cleanup function to clear timeout if component unmounts
+    return () => clearTimeout(timer);
 
-      setDonations(filteredData);
-      setIsLoading(false);
-    }, 1500);
   }, [listType, role]);
 
    const handleClaim = (donationId: string, quantityToClaim: number) => {
     console.log(`Reclamando ${quantityToClaim} unidades de la donación ${donationId}`);
 
+    // Find the donation being claimed
+    const claimedDonation = donations.find(d => d.id === donationId);
+    if (!claimedDonation) {
+        toast({ title: "Error", description: "Donación no encontrada.", variant: "destructive" });
+        return;
+    }
+
+    // Simulate state update
     setDonations(prevDonations => {
        const updatedDonations = prevDonations.map(d => {
         if (d.id === donationId) {
-            const remainingQuantity = d.quantity - quantityToClaim;
-            // If remaining quantity is 0 or less, mark as claimed fully
-            // Otherwise, just update the quantity (this simple model assumes partial claims remove the listing for simplicity, adjust if needed)
+            // Simple model: assume full claim removes item from 'available' list.
+            // In a real app, you might adjust quantity or handle partial claims differently.
             return {
                 ...d,
-                // quantity: remainingQuantity > 0 ? remainingQuantity : 0, // Example: Update quantity
-                status: 'claimed' as const, // Mark as claimed regardless of partial/full for now
-                claimedBy: 'Tu Organización', // Assume current user
+                status: 'claimed' as const, // Mark as claimed
+                claimedBy: 'Tu Organización', // Assume current user is 'Tu Organización'
                 claimedAt: new Date().toISOString() // Set claim time
             };
         }
         return d;
        });
 
-        // If listType is 'available', filter out the claimed item immediately
+        // If the current view is 'available', filter out the newly claimed item
        if (listType === 'available') {
             return updatedDonations.filter(d => d.id !== donationId);
        }
+       // Otherwise, just update the status within the existing list (e.g., in 'all' view)
        return updatedDonations;
 
     });
+
+    // Show success toast
      toast({
       title: "¡Donación Reclamada!",
-      description: `Has reclamado ${quantityToClaim} unidades de ${donations.find(d => d.id === donationId)?.itemName || 'la donación'}. Revisa la pestaña 'Mis Reclamadas' para ver detalles y mensajes.`,
+      description: `Has reclamado ${quantityToClaim} ${claimedDonation.unit} de ${claimedDonation.itemName}. Revisa la pestaña 'Mis Reclamadas' para ver detalles y mensajes.`,
+      duration: 5000, // Show for 5 seconds
     });
   };
 
-  const loadingSkeletons = Array.from({ length: 6 }).map((_, index) => (
-       <SkeletonCard key={index} className="w-full overflow-hidden shadow-md flex flex-col">
-         <SkeletonCardHeader className="pb-2">
-            <Skeleton className="h-6 w-3/4 mb-1" />
-            <Skeleton className="h-4 w-1/2" />
-         </SkeletonCardHeader>
-          <SkeletonCardContent className="flex-grow grid gap-3">
-             <Skeleton className="h-40 w-full rounded-md" />
-             <Skeleton className="h-4 w-5/6" />
-             <Skeleton className="h-4 w-3/4" />
-             <Skeleton className="h-4 w-4/5" />
-             <Skeleton className="h-3 w-1/3 mt-1" />
-          </SkeletonCardContent>
-           <SkeletonCardFooter>
-             <Skeleton className="h-10 w-full" />
-           </SkeletonCardFooter>
-       </SkeletonCard>
-    ));
+ // Skeleton Loader structure
+ const loadingSkeletons = Array.from({ length: 6 }).map((_, index) => (
+    <SkeletonCard key={index} className="w-full overflow-hidden shadow-md flex flex-col bg-card">
+        <SkeletonCardHeader className="p-4 pb-2">
+            <div className="flex justify-between items-start mb-1">
+                <Skeleton className="h-5 w-3/5" /> {/* Item Name */}
+                <Skeleton className="h-4 w-1/4" /> {/* Badge */}
+            </div>
+            <div className="flex justify-between items-center mt-1">
+                <Skeleton className="h-3 w-2/5" /> {/* Posted by */}
+                <Skeleton className="h-4 w-1/3" /> {/* Price */}
+            </div>
+             <Skeleton className="h-3 w-4/5 mt-1" /> {/* Description */}
+        </SkeletonCardHeader>
+        <SkeletonCardContent className="p-4 pt-2 flex-grow grid gap-2">
+            <Skeleton className="h-40 w-full rounded-md bg-muted mb-2" /> {/* Image */}
+            <div className="grid grid-cols-[auto,1fr] items-center gap-x-2 gap-y-1">
+                <Skeleton className="h-4 w-4 rounded-full" /> <Skeleton className="h-4 w-3/4" /> {/* Expiry */}
+                <Skeleton className="h-4 w-4 rounded-full" /> <Skeleton className="h-4 w-2/3" /> {/* Quantity */}
+                <Skeleton className="h-4 w-4 rounded-full" /> <Skeleton className="h-4 w-full" /> {/* Location */}
+            </div>
+        </SkeletonCardContent>
+        <SkeletonCardFooter className="p-3">
+             <Skeleton className="h-8 w-full" /> {/* Action Button / Status */}
+        </SkeletonCardFooter>
+    </SkeletonCard>
+));
 
 
   if (isLoading) {
@@ -265,7 +298,8 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
                 <AlertTitle className="font-semibold text-lg">No Hay Donaciones Aquí</AlertTitle>
                 <AlertDescription className="text-muted-foreground">
                     {listType === 'available' && "¡Parece que todas las donaciones han sido reclamadas! Vuelve más tarde."}
-                    {listType === 'claimed' && "No tienes donaciones reclamadas pendientes."}
+                    {listType === 'claimed' && role === 'organization' && "No tienes donaciones reclamadas pendientes."}
+                     {listType === 'claimed' && role === 'business' && "Ninguna de tus donaciones publicadas ha sido reclamada aún."}
                     {listType === 'history' && "No hay historial de donaciones todavía."}
                     {listType === 'all' && "No se encontraron donaciones."}
                  </AlertDescription>
@@ -275,14 +309,18 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
   }
 
   return (
-     <div className={cn("grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6", className)}>
+     <div className={cn("grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6", className)}>
       {donations.map(donation => (
         <DonationCard
           key={donation.id}
           donation={donation}
           onClaim={handleClaim} // Pass the updated handler
           isClaimable={role === 'organization' && donation.status === 'available'}
-          showDetailsLink={role === 'organization' && donation.status === 'claimed'}
+          // Show details link for Org on their claimed items, or for Biz on items they posted that are claimed/delivered/expired
+           showDetailsLink={
+               (role === 'organization' && donation.status === 'claimed') ||
+               (role === 'business' && (donation.status === 'claimed' || donation.status === 'delivered' || donation.status === 'expired'))
+            }
         />
       ))}
     </div>
@@ -290,3 +328,4 @@ const DonationList: FC<DonationListProps> = ({ listType = 'available', role, cla
 };
 
 export default DonationList;
+

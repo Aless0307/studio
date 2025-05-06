@@ -3,15 +3,69 @@
 import type { FC } from 'react';
 import Header from '@/components/header';
 import DonationDetailView from '@/components/donation-detail-view';
-import type { Donation } from '@/types/donation'; // Assuming Donation type exists
+import type { Donation, Message } from '@/types/donation'; // Assuming Donation type exists
 import { MessageSquare, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { parseISO } from 'date-fns';
 
-// --- Mock Data Fetching (Replace with actual data fetching) ---
-// In a real app, you'd fetch this based on the `params.id`
+// --- Mock Data Fetching (Updated) ---
+
+// Helper to generate mock messages (consistent with MockMessagesView)
+const generateMockMessagesForDetail = (donationId: string, status: Donation['status']): Message[] => {
+  const messages: Message[] = [];
+  const baseTime = new Date();
+
+  messages.push({
+    id: `${donationId}-msg-1`,
+    sender: 'system',
+    text: 'Donación publicada por Empresa.',
+    timestamp: new Date(baseTime.getTime() - 86400000 * 2), // 2 days ago
+  });
+
+  if (status === 'claimed' || status === 'delivered') {
+    messages.push({
+      id: `${donationId}-msg-2`,
+      sender: 'organization',
+      text: 'Hola, hemos reclamado esta donación. ¿Cuándo podemos pasar a recogerla?',
+      timestamp: new Date(baseTime.getTime() - 86400000), // 1 day ago
+    });
+    messages.push({
+      id: `${donationId}-msg-3`,
+      sender: 'business',
+      text: '¡Genial! Pueden pasar mañana entre las 10 AM y las 4 PM. Por favor, usen la entrada trasera.',
+      timestamp: new Date(baseTime.getTime() - 86400000 + 3600000), // 1 day ago + 1 hour
+    });
+  }
+  if (status === 'delivered') {
+     messages.push({
+      id: `${donationId}-msg-4`,
+      sender: 'organization',
+      text: 'Recogido, ¡muchas gracias!',
+      timestamp: new Date(baseTime.getTime() - 3600000), // 1 hour ago
+    });
+     messages.push({
+      id: `${donationId}-msg-5`,
+      sender: 'system',
+      text: 'Entrega validada por la empresa.',
+      timestamp: new Date(baseTime.getTime() - 1800000), // 30 mins ago
+    });
+  }
+    // Add specific messages from MockMessagesView example if needed
+    if (donationId === 'msg-thread-2') { // Corresponds to i=1 in MockMessagesView
+         messages.push({ id: `${donationId}-m6`, sender: 'business', text: '¿Alguna novedad sobre la recogida?', timestamp: new Date() });
+    }
+     if (donationId === 'msg-thread-1') { // Corresponds to i=0 in MockMessagesView
+         messages.push({ id: `${donationId}-m7`, sender: 'organization', text: '¿Estáis hoy hasta las 5?', timestamp: new Date() });
+     }
+
+
+  return messages;
+};
+
+
 const fetchMockDonationById = (id: string): Donation | null => {
-   // Simple mock: return the validation mock if ID matches, otherwise null
+   // Simple mock: return the validation mock if ID matches
     if (id === 'donation-val-1') {
       return {
           id: `donation-val-1`,
@@ -96,6 +150,49 @@ const fetchMockDonationById = (id: string): Donation | null => {
         };
       }
 
+      // --- Add Mocks for Message Threads ---
+      // Reuse logic from MockMessagesView to generate consistent data
+      const messageThreadMatch = id.match(/^msg-thread-(\d+)$/);
+      if (messageThreadMatch) {
+          const index = parseInt(messageThreadMatch[1], 10) - 1;
+          if (index >= 0 && index < 5) { // Assuming 5 threads were generated in MockMessagesView
+              const status = index % 2 === 0 ? 'claimed' : 'delivered'; // Alternate claimed/delivered
+              const baseDate = new Date();
+              const postedDate = new Date(baseDate.getTime() - 86400000 * (index + 3)); // Posted 3-7 days ago
+              const claimedDate = new Date(postedDate.getTime() + 86400000); // Claimed 1 day after post
+              const deliveredDate = status === 'delivered' ? new Date(claimedDate.getTime() + 86400000 * (index % 2 + 1)) : undefined; // Delivered 1-2 days after claim
+              const isFree = index % 3 !== 0;
+              const itemName = `Artículo de Prueba ${index + 1}`;
+              const photoHint = index % 2 === 0 ? 'vegetables box' : 'canned goods';
+
+              return {
+                   id: id, // Use the requested ID
+                   itemName: itemName,
+                   description: `Descripción de ${itemName}.`,
+                   quantity: (index + 1) * 5,
+                   unit: index % 2 === 0 ? 'kg' : 'unidades',
+                   postedBy: `Empresa ${String.fromCharCode(65 + index)}`,
+                   claimedBy: `Org ${index + 1}`,
+                   status: status,
+                   messages: generateMockMessagesForDetail(id, status), // Generate specific messages
+                   expirationDate: new Date(baseDate.getTime() + 86400000 * 5).toISOString(),
+                   pickupLocation: `Ubicación de Recogida ${index + 1}`,
+                   pickupInstructions: index % 2 === 0 ? 'Usar muelle trasero.' : 'Preguntar en recepción.',
+                   isFree: isFree,
+                   pricePerUnit: isFree ? undefined : 15.00,
+                   postedAt: postedDate.toISOString(),
+                   claimedAt: claimedDate.toISOString(),
+                   deliveredAt: deliveredDate?.toISOString(),
+                   validationCode: status === 'claimed' || status === 'delivered' ? `VAL-MSG-${index + 1}` : undefined,
+                   qualityRating: status === 'delivered' ? (index % 5 + 1) : undefined,
+                   photoUrl: `https://picsum.photos/seed/${photoHint.replace(/ /g, '_')}/400/300`,
+                   'data-ai-hint': photoHint,
+                 };
+          }
+      }
+      // --- End Message Thread Mocks ---
+
+
     return null; // Donation not found
 };
 // --- End Mock Data ---
@@ -107,7 +204,9 @@ interface DonationPageProps {
 
 const DonationPage: FC<DonationPageProps> = ({ params }) => {
   const donationId = params.id;
+  // Fetch donation data using the updated function
   const donation = fetchMockDonationById(donationId);
+
 
   if (!donation) {
     return (
@@ -129,8 +228,23 @@ const DonationPage: FC<DonationPageProps> = ({ params }) => {
     );
   }
 
-  // Assume role based on some logic or context, hardcoding for now
-  const userRole: 'business' | 'organization' = donation.claimedBy === 'Tu Organización' ? 'organization' : 'business'; // Example logic
+  // Assume role based on some logic or context.
+  // For mocks, we can deduce based on 'claimedBy' or a hypothetical user context.
+  // Here, if 'claimedBy' exists and isn't 'Tu Organización', assume business role viewing their posted item.
+  // If claimedBy is 'Tu Organización', assume organization role.
+  // This logic might need refinement based on actual user roles.
+  let userRole: 'business' | 'organization';
+  if (donation.claimedBy) {
+      // Simple logic: if claimed by "Your Organization", user is org, otherwise business (viewing their posted item)
+      // In a real app, this would depend on the logged-in user's actual role and relation to the donation.
+      userRole = donation.claimedBy === 'Tu Organización' ? 'organization' : 'business';
+  } else {
+      // If not claimed, the role might be ambiguous or default to one. Let's default to business for viewing details.
+      // Or perhaps only claimed items should have detail pages accessible this way.
+      // For simplicity, let's assume the primary viewer is the business if not claimed by "Tu Organización"
+      userRole = 'business';
+  }
+
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-b from-background to-secondary/20 dark:from-background dark:to-black/40">
@@ -166,7 +280,9 @@ export default DonationPage;
 //   // Fetch all donation IDs
 //   // const donations = await fetchAllDonationIds();
 //   const mockIds = ['donation-val-1', 'donation-3', 'donation-paid-1']; // Example IDs including paid one
-//   return mockIds.map((id) => ({
+//    const messageThreadIds = Array.from({ length: 5 }, (_, i) => `msg-thread-${i + 1}`); // Add message thread IDs
+//   return [...mockIds, ...messageThreadIds].map((id) => ({
 //     id: id,
 //   }));
 // }
+
