@@ -104,17 +104,13 @@ const FormLabel = React.forwardRef<
 FormLabel.displayName = "FormLabel"
 
 const FormControl = React.forwardRef<
-  React.ElementRef<typeof Slot>,
-  React.ComponentPropsWithoutRef<typeof Slot>
+  React.ElementRef<typeof React.Fragment>,
+  React.ComponentPropsWithoutRef<typeof React.Fragment>
 >(({ className, children, ...props }, ref) => {
   return (
-    <Slot
-      ref={ref}
-      className={className}
-      {...props}
-    >
+    
       {children}
-    </Slot>
+    
   )
 })
 FormControl.displayName = "FormControl"
@@ -126,12 +122,9 @@ const FormDescription = React.forwardRef<
   const { formDescriptionId } = useFormField()
 
   return (
-    <p
-      ref={ref}
-      id={formDescriptionId}
-      className={cn("text-sm text-muted-foreground", className)}
+    
       {...props}
-    />
+    
   )
 })
 FormDescription.displayName = "FormDescription"
@@ -148,14 +141,9 @@ const FormMessage = React.forwardRef<
   }
 
   return (
-    <p
-      ref={ref}
-      id={formMessageId}
-      className={cn("text-sm font-medium text-destructive", className)}
-      {...props}
-    >
+    
       {body}
-    </p>
+    
   )
 })
 FormMessage.displayName = "FormMessage"
