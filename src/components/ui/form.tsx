@@ -112,7 +112,6 @@ const FormControl = React.forwardRef<
   return (
     <Slot
       ref={ref}
-      id={formItemId}
       aria-describedby={
         !error
           ? `${formDescriptionId}`
@@ -180,3 +179,4 @@ export {
   FormMessage,
   FormField,
 }
+
