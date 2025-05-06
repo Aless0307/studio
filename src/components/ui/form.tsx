@@ -122,7 +122,8 @@ const FormControl = React.forwardRef<
       className={className}
       {...props}
     >
-      {children}
+      {/* Wrap children in a React.Fragment to support multiple children */}
+      <React.Fragment>{children}</React.Fragment>
     </Slot>
   )
 })
