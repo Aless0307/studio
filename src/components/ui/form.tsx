@@ -112,17 +112,11 @@ const FormControl = React.forwardRef<
   return (
     <Slot
       ref={ref}
-      aria-describedby={
-        !error
-          ? `${formDescriptionId}`
-          : `${formDescriptionId} ${formMessageId}`
-      }
-      aria-invalid={!!error}
       className={className}
       {...props}
     >
       {/* Wrap children in a React.Fragment to support multiple children */}
-      <React.Fragment>{children}</React.Fragment>
+      <React.Fragment key={"form-control-fragment"}>{children}</React.Fragment>
     </Slot>
   )
 })
@@ -179,4 +173,5 @@ export {
   FormMessage,
   FormField,
 }
+
 
